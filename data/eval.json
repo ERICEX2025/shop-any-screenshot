@@ -1,0 +1,2428 @@
+{
+ "date": "2026-11-21",
+ "runs": 2,
+ "images": [
+  "bathroom.jpg",
+  "bag.jpg",
+  "desk.jpg",
+  "table.jpg",
+  "hotsauce.jpg",
+  "shot_room.jpg",
+  "shot_outfit.jpg"
+ ],
+ "key_items": 78,
+ "exact_possible": 38,
+ "similar_only": 40,
+ "summary": "7 images, 39 hand-keyed items (19 branded with a knowable exact listing, 20 unbranded where only a similar item exists), each system run 2 times; numbers are totals over the runs.",
+ "rows": [
+  {
+   "name": "Full pipeline",
+   "what": "Hydrogen + search + Decision 1 gate + Neon second look",
+   "found": 78,
+   "correct_pre": 29,
+   "wrong_pre": 0,
+   "held_ok": 2,
+   "held_missed": 7,
+   "similar_offered": 39,
+   "similar_ok": 39,
+   "extra": 23,
+   "extra_pre": 0,
+   "sec_per_image": 29.0,
+   "per_run": [
+    {
+     "found": 39,
+     "correct_pre": 14,
+     "wrong_pre": 0,
+     "held_ok": 1,
+     "held_missed": 4,
+     "similar_offered": 20,
+     "similar_ok": 20,
+     "extra": 11,
+     "extra_pre": 0
+    },
+    {
+     "found": 39,
+     "correct_pre": 15,
+     "wrong_pre": 0,
+     "held_ok": 1,
+     "held_missed": 3,
+     "similar_offered": 19,
+     "similar_ok": 19,
+     "extra": 12,
+     "extra_pre": 0
+    }
+   ]
+  },
+  {
+   "name": "Baseline",
+   "what": "one Hydrogen call, first search result, everything into the cart",
+   "found": 78,
+   "correct_pre": 26,
+   "wrong_pre": 12,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 40,
+   "similar_ok": 38,
+   "extra": 39,
+   "extra_pre": 39,
+   "sec_per_image": 5.7,
+   "per_run": [
+    {
+     "found": 39,
+     "correct_pre": 14,
+     "wrong_pre": 5,
+     "held_ok": 0,
+     "held_missed": 0,
+     "similar_offered": 20,
+     "similar_ok": 19,
+     "extra": 20,
+     "extra_pre": 20
+    },
+    {
+     "found": 39,
+     "correct_pre": 12,
+     "wrong_pre": 7,
+     "held_ok": 0,
+     "held_missed": 0,
+     "similar_offered": 20,
+     "similar_ok": 19,
+     "extra": 19,
+     "extra_pre": 19
+    }
+   ]
+  }
+ ],
+ "hides": [
+  "Small sample: 7 images, 2 of them synthetic screenshots made with gemini-nano-banana-2.1, keyed by one person.",
+  "A listing is judged by keywords in its title, not by a person opening it. A similar item counts as acceptable if it is the right type of thing with the main attribute; nobody checked that it really looks alike.",
+  "The baseline pre-selects everything, so it can never hold an item back; for unbranded items its first result lands in the cart unasked, while the pipeline only suggests it.",
+  "The keyword scorer errs in both directions. Seen by hand: baseline listings that were right but spelled differently ('Moisturising', 'Post It') counted as wrong; pipeline items counted as 'held back although right' where Neon had flagged a real size difference (20 oz bottle vs 14 oz, 60 ml vs 30 ml, a 12-pack).",
+  "The answer key and scorer were corrected once after a first run (brand taken from the seller name, 'RX Bar' spelling, Cholula flavours), before the run saved here.",
+  "Items a system found that are not in the answer key are not scored (see extra and extra_pre in data/eval.json). The baseline put all of those in the cart too.",
+  "The pipeline is slower: the baseline is one model call, the pipeline adds a Neon call for every item without a confident exact match. Seconds are per image with 3 images running at once; on the page the first results paint after Hydrogen + Decision 1 (about 8 to 12 s) and Neon fills in after.",
+  "Totals over runs hide run-to-run variance; per_run in data/eval.json shows each run."
+ ],
+ "failures": [
+  "Dense shelves: a wall of hundreds of bottles yields only the few items with large labels (the cap is 12 items per scan).",
+  "Generic unbranded items: there is no exact listing, so the result is a look-alike chosen from 6 search results, not the same item.",
+  "Pack sizes: a single can or bar often only has multi-pack listings; Neon flags it in words, but the size on the shelf can still differ from the listing's default variant.",
+  "One cart per merchant: the best listings usually come from different stores, so 5 items can mean 5 carts and 5 shipping fees.",
+  "Run-to-run variance: Hydrogen names and boxes items slightly differently each run, so the same image can give a different item count and different matches."
+ ],
+ "detail": [
+  {
+   "run": 1,
+   "system": "Full pipeline",
+   "image": "bathroom.jpg",
+   "seconds": 22.4,
+   "found": 6,
+   "correct_pre": 5,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 1,
+   "similar_offered": 0,
+   "similar_ok": 0,
+   "extra": 2,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Dr. Bronner's Peppermint Pure-Castile Soap 32 oz",
+     "seen_as": "Dr. Bronner's Pure-Castile Liquid Soap Peppermint 32 oz",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Dr. Bronner's OLPE32 Pure-Castile Liquid Soap, Peppermint, 32 Oz Dr. Bronner's OLPE32 Pure-Castile Liquid Soap, Peppermi",
+     "reason": ""
+    },
+    {
+     "item": "Cetaphil Gentle Skin Cleanser 16 fl oz",
+     "seen_as": "Cetaphil Gentle Skin Cleanser 16 FL OZ",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-4-neon",
+     "listing": "Cetaphil Gentle Skin Cleanser Lotion, Unscented, 16 fl oz Cetaphil Gentle Skin Cleanser Lotion, Unscented, 16 fl oz [sol",
+     "reason": "Same Cetaphil Gentle Skin Cleanser 16 fl oz pump bottle in updated packaging"
+    },
+    {
+     "item": "CeraVe Moisturizing Cream (tub)",
+     "seen_as": "CeraVe Moisturizing Cream",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-4-neon",
+     "listing": "CeraVe Moisturizing Cream for Dry Skin CeraVe Moisturizing Cream for Dry Skin [sold by Exclusive Beauty Club]",
+     "reason": "Same CeraVe Moisturizing Cream jar"
+    },
+    {
+     "item": "Native Deodorant Coconut & Vanilla",
+     "seen_as": "Native Deodorant Coconut & Vanilla",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Native Natural Deodorant, Coconut & Vanilla, Aluminum Free, 2.65 oz Native Natural Deodorant, Coconut & Vanilla, Aluminu",
+     "reason": ""
+    },
+    {
+     "item": "The Ordinary Niacinamide serum",
+     "seen_as": "The Ordinary Facial Serum",
+     "result": "held back although its top listing was right (one extra tap)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "The Ordinary Niacinamide 10% + Zinc 1% Serum The Ordinary Niacinamide 10% + Zinc 1% Serum [sold by Cloud 10 Beauty]",
+     "reason": "same Niacinamide 10% + Zinc 1% serum, larger 60ml bottle"
+    },
+    {
+     "item": "Burt's Bees Beeswax Lip Balm (one tube)",
+     "seen_as": "Burt's Bees Beeswax Lip Balm",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Burt's Bees Beeswax Lip Balm - 0.15 oz. Burt's Bees Beeswax Lip Balm - 0.15 oz. [sold by Weiner's LTD]",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Toothpaste Tube white squeezed",
+     "result": "not pre-selected",
+     "status": "none",
+     "listing": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Hair Tie black elastic",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Womens Elastic Hair Tie - 27 Count, Black - 4MM for Medium Hair- Hair Accessories for Women Perfect for Long Lasting Bra"
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Full pipeline",
+   "image": "bag.jpg",
+   "seconds": 33.6,
+   "found": 6,
+   "correct_pre": 3,
+   "wrong_pre": 0,
+   "held_ok": 1,
+   "held_missed": 1,
+   "similar_offered": 1,
+   "similar_ok": 1,
+   "extra": 1,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Liquid I.V. Hydration Multiplier Lemon Lime",
+     "seen_as": "Liquid I.V. Hydration Multiplier Lemon Lime",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Lemon Lime Hydration Multiplier\u00ae Lemon Lime Hydration Multiplier\u00ae [sold by Liquid I.V. ]",
+     "reason": ""
+    },
+    {
+     "item": "Aquaphor Healing Ointment (tube)",
+     "seen_as": "Aquaphor Healing Ointment",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-4-neon",
+     "listing": "Aquaphor, Healing Ointment, Advanced Therapy, Skin Protectant, 1.75 oz (50 g) Aquaphor, Healing Ointment, Advanced Thera",
+     "reason": "Exact same Aquaphor Healing Ointment 1.75 oz squeeze tube."
+    },
+    {
+     "item": "KIND nut bar (one bar)",
+     "seen_as": "KIND Nut Bar",
+     "result": "correctly held back",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "KIND Bars, Nut Bar, Dark Chocolate Nuts & Sea Salt, 12 Bars, 1.4 oz (40 g) Each KIND Bars, Nut Bar, Dark Chocolate Nuts ",
+     "reason": "12-pack box instead of a single bar"
+    },
+    {
+     "item": "Advil (bottle)",
+     "seen_as": "Advil Ibuprofen",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-4-neon",
+     "listing": "Advil Ibuprofen Pain Relief and Fever Reducer Tablets Advil Ibuprofen Pain Relief and Fever Reducer Tablets [sold by Sho",
+     "reason": "Same Advil Ibuprofen coated tablets; exact bottle count not visible"
+    },
+    {
+     "item": "Orbit gum (one pack)",
+     "seen_as": "Orbit Chewing Gum",
+     "result": "held back although its top listing was right (one extra tap)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "ORBIT Wintermint Sugar Free Chewing Gum, 12 Packs of 14 Pieces (168 Total) ORBIT Wintermint Sugar Free Chewing Gum, 12 P",
+     "reason": "12-pack of Wintermint, not a single pack"
+    },
+    {
+     "item": "White wired earbuds (no readable brand)",
+     "seen_as": "Wired Earbuds White",
+     "result": "acceptable similar item (suggested)",
+     "status": "confirm",
+     "decided_by": "gemini-4-neon",
+     "listing": "Apple EarPods Wired Earbuds With In-line Controls 3.5mm Headphone Jack & Lightning MD827LL/A MWU53AM/A MNHF2AM/A MMTN2AM",
+     "reason": "Same white wired EarPods shape and style"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Duffel Bag Grey Canvas",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Rothco Charcoal Grey 19-Inch Canvas Shoulder Duffle Bag 22210 Rothco Charcoal Grey 19-Inch Canvas Shoulder Duffle Bag 22"
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Full pipeline",
+   "image": "desk.jpg",
+   "seconds": 22.1,
+   "found": 8,
+   "correct_pre": 4,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 1,
+   "similar_offered": 3,
+   "similar_ok": 3,
+   "extra": 2,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "RXBAR Chocolate Sea Salt (open box of bars)",
+     "seen_as": "RXBAR Protein Bar Chocolate Sea Salt",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "RX Bar Chocolate Sea Salt, 1.8 oz RX Bar Chocolate Sea Salt, 1.8 oz [sold by BevMo!]",
+     "reason": ""
+    },
+    {
+     "item": "LaCroix Pamplemousse (one can)",
+     "seen_as": "LaCroix Sparkling Water Pamplemousse",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "LaCroix Pamplemousse Sparkling Water 12 fl oz LaCroix Pamplemousse Sparkling Water 12 fl oz [sold by Hudson Grocery Co-O",
+     "reason": ""
+    },
+    {
+     "item": "Hydro Flask Wide Mouth bottle, blue",
+     "seen_as": "Hydro Flask Wide Mouth Water Bottle Blue",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-4-neon",
+     "listing": "32oz Wide Mouth Hydroflask Water Bottle 32oz Wide Mouth Hydroflask Water Bottle [sold by Starr Mountain Outfitters]",
+     "reason": "Same Hydro Flask 32 oz wide mouth bottle with blue color options"
+    },
+    {
+     "item": "Altoids Peppermint (one tin)",
+     "seen_as": "Altoids Mints Peppermint",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Altoids Peppermint Mints 1.76oz Altoids Peppermint Mints 1.76oz [sold by BevMo!]",
+     "reason": ""
+    },
+    {
+     "item": "Post-it Notes, yellow",
+     "seen_as": "Post-it Notes Yellow",
+     "result": "held back although its top listing was right (one extra tap)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "3M Post-it Notes 656B - Yellow 3M Post-it Notes 656B - Yellow [sold by Stationery Pal]",
+     "reason": "single yellow Post-it pad, slightly smaller rectangular size"
+    },
+    {
+     "item": "Anker power bank (model not readable)",
+     "seen_as": "Anker Portable Charger Black",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Refurbished Anker 313 Power Bank (PowerCore 10K) Refurbished Anker <b>313</b> Power Bank (PowerCore 10K) [sold by Anker-",
+     "reason": "slimmer model with fewer ports and a top button"
+    },
+    {
+     "item": "Black hardcover notebook (no brand)",
+     "seen_as": "Hardcover Notebook Black",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Leuchtturm 1917 Hardcover Notebook - Black Leuchtturm 1917 Hardcover Notebook - Black [sold by Jenni Bick Custom Journal",
+     "reason": "Same black hardcover style with elastic band and rounded corners"
+    },
+    {
+     "item": "White ceramic mug (no brand)",
+     "seen_as": "Coffee Mug White Ceramic",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Coffee Mug - 11oz (white) Coffee Mug - 11oz (white) [sold by Bar Products ]",
+     "reason": "same plain white ceramic shape and C-handle"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Laptop Space Gray",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "CTO/14\"MacBook Pro - Space Grey/M1Pro 10C CPU_32C GPU/16GB or 32GB/512GB SSD/67W or 96W/1/Keyboard PT (Z15G_4_PO_CTO) CT"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Zip-Up Hoodie Black",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Tyson Zip Up Hoodie - Black Tyson Zip Up Hoodie - Black [sold by Fashion Nova]"
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Full pipeline",
+   "image": "table.jpg",
+   "seconds": 37.8,
+   "found": 5,
+   "correct_pre": 1,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 1,
+   "similar_offered": 3,
+   "similar_ok": 3,
+   "extra": 2,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Louisiana Hot Sauce Original 6 oz",
+     "seen_as": "Louisiana The Perfect Hot Sauce Original 6 fl oz",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Louisiana The Perfect Hot Sauce, 6 Fl Oz Louisiana The Perfect Hot Sauce, 6 Fl Oz [sold by ShelHealth]",
+     "reason": ""
+    },
+    {
+     "item": "Heinz Tomato Ketchup (one bottle)",
+     "seen_as": "Heinz Tomato Ketchup",
+     "result": "held back although its top listing was right (one extra tap)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Heinz Original Tomato Ketchup 20oz Heinz Original Tomato Ketchup 20oz [sold by BevMo!]",
+     "reason": "20 oz squeeze bottle, not the 14 oz glass bottle"
+    },
+    {
+     "item": "Glass salt shaker (no brand)",
+     "seen_as": "Salt Shaker Clear glass with silver metal top",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Cooking Concepts Glass Salt Pepper Shaker Set Metal Tops 3.5\" Kitchen Tableware Cooking Concepts Glass Salt Pepper Shake",
+     "reason": "shorter paneled glass body and flatter metal lids"
+    },
+    {
+     "item": "Small stainless creamer pitcher (no brand)",
+     "seen_as": "Creamer Pitcher Silver stainless steel",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Metallurgica Motta Tulip Stainless Steel Milk Frothing Pitcher, 11.8-Oz Metallurgica Motta Tulip Stainless Steel Milk Fr",
+     "reason": "straighter sides and angular open handle"
+    },
+    {
+     "item": "White mug (no brand)",
+     "seen_as": "Coffee Mug White ceramic",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Coffee Mug - 11oz (white) Coffee Mug - 11oz (white) [sold by Bar Products ]",
+     "reason": "Plain white ceramic mug, straighter sides than the rounded base"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Drinking Glass Clear tall glass",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Celina Glass Set of 8 (4 Tall + 4 Short) - Clear Celina Glass Set of 8 (4 Tall + 4 Short) - Clear [sold by stonelain.co]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Spoon Silver stainless steel",
+     "result": "not pre-selected",
+     "status": "none",
+     "listing": ""
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Full pipeline",
+   "image": "hotsauce.jpg",
+   "seconds": 20.4,
+   "found": 1,
+   "correct_pre": 1,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 0,
+   "similar_ok": 0,
+   "extra": 1,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Cholula Original Hot Sauce",
+     "seen_as": "Cholula Hot Sauce Original",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Cholula Original Hot Sauce - 5oz Cholula Original Hot Sauce - 5oz [sold by BevMo!]",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Peace Hot Sauce It's Hot!",
+     "result": "not pre-selected",
+     "status": "none",
+     "listing": ""
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Full pipeline",
+   "image": "shot_room.jpg",
+   "seconds": 23.1,
+   "found": 7,
+   "correct_pre": 0,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 7,
+   "similar_ok": 7,
+   "extra": 3,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Green velvet sofa",
+     "seen_as": "Velvet Sofa Forest green velvet mid-century modern",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Nicholi 84\" Mid Century Modern Sofa, Olive Green Performance Velvet Olive Green Foam Velvet 3 Seat Nicholi 84\" Mid Centu",
+     "reason": "olive green instead of forest green, smooth bench seat instead of tufted"
+    },
+    {
+     "item": "Round walnut coffee table",
+     "seen_as": "Round Coffee Table Walnut wood mid-century modern",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Round Coffee Table, 39\" Circle Center Table with Reinforced Cross Brace Round Coffee Table, 39\" Circle Center Table with",
+     "reason": "same round shape and cross-brace, chunkier legs"
+    },
+    {
+     "item": "Brass arc floor lamp",
+     "seen_as": "Arc Floor Lamp Brushed brass dome shade",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Teamson Home Arquer Arc 68\" Metal Floor Lamp with Bell Shade, Antique Brass Teamson Home Arquer Arc 68\" Metal Floor Lamp",
+     "reason": "same arc shape and brass dome shade, but black stem and base"
+    },
+    {
+     "item": "Cream boucle armchair",
+     "seen_as": "Boucle Accent Chair Cream white boucle",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "MARA WHITE BOUCLE SWIVEL CHAIR MARA WHITE BOUCLE SWIVEL CHAIR [sold by REEMO FURNITURE]",
+     "reason": "same shape and boucle fabric, but fixed seat instead of separate cushion"
+    },
+    {
+     "item": "Jute area rug",
+     "seen_as": "Woven Area Rug Natural jute braided",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Rigo Hand Woven Farmhouse Jute Area Rug Rigo Hand Woven Farmhouse Jute Area Rug [sold by nuLOOM]",
+     "reason": "same chunky natural jute weave and rectangular shape"
+    },
+    {
+     "item": "White planter",
+     "seen_as": "Planter with Wood Stand White ceramic cylinder",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "D'vine Dev Ceramic Planter with Natural Stand - 10 Inch Modern Round Flower Pot with Wood Planter Holder, White, 55-B-K-",
+     "reason": "lighter wood stand wraps around pot"
+    },
+    {
+     "item": "Mustard throw pillow",
+     "seen_as": "Throw Pillow Mustard yellow",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Light Mustard Yellow Solid Colour Throw Pillow Light Mustard Yellow Solid Colour Throw Pillow [sold by Society6]",
+     "reason": "solid square pillow, lighter yellow and smoother fabric"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Throw Pillow Beige textured",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Beige Textured Modern Woven 18\" Throw Pillow Beige Textured Modern Woven 18\" Throw Pillow [sold by Willow & Loom]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Framed Wall Art Abstract wood frame",
+     "result": "not pre-selected",
+     "status": "none",
+     "listing": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Decorative Tray Round brass",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Round Brass Tray Round Brass Tray [sold by roaniris.co]"
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Full pipeline",
+   "image": "shot_outfit.jpg",
+   "seconds": 23.3,
+   "found": 6,
+   "correct_pre": 0,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 6,
+   "similar_ok": 6,
+   "extra": 0,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Camel long wool coat",
+     "seen_as": "Long Overcoat camel wool",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Women's Timeless Camel Long Wool Coat Women's Timeless Camel Long Wool Coat [sold by Lors Boutique]",
+     "reason": "same camel colour and long length, softer shoulders"
+    },
+    {
+     "item": "Cream turtleneck sweater",
+     "seen_as": "Turtleneck Sweater cream ribbed knit",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Ribbed Turtleneck Sweater In Cream Ribbed Turtleneck Sweater In Cream [sold by ShopSimon]",
+     "reason": "finer knit and less chunky collar"
+    },
+    {
+     "item": "Blue straight-leg jeans",
+     "seen_as": "Straight-Leg Jeans medium wash blue denim",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Judy Blue Straight Leg Jeans - Medium Wash Judy Blue Straight Leg Jeans - Medium Wash [sold by Magnolia Boutique]",
+     "reason": "same straight cut, slightly lighter wash"
+    },
+    {
+     "item": "White leather sneakers",
+     "seen_as": "Low-Top Sneakers white leather",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Women's Premier Low Top | White Women's Premier Low Top | White [sold by Thursday Boot Company]",
+     "reason": "same minimalist white low-top style and flat sole"
+    },
+    {
+     "item": "Black leather tote bag",
+     "seen_as": "Tote Bag black leather",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Everyday Tote | Black (M) (Zipper) Everyday Tote | Black (M) (Zipper) [sold by Thursday Boot Company]",
+     "reason": "same minimalist black leather tote shape and dual handles"
+    },
+    {
+     "item": "Round sunglasses",
+     "seen_as": "Round Sunglasses tortoiseshell",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Round Tortoiseshell Sunglasses with Polycarbonate Frame and Decorative Lenses Round Tortoiseshell Sunglasses with Polyca",
+     "reason": "same clear round frame and dark lenses"
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Baseline",
+   "image": "bathroom.jpg",
+   "seconds": 4.7,
+   "found": 6,
+   "correct_pre": 5,
+   "wrong_pre": 1,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 0,
+   "similar_ok": 0,
+   "extra": 0,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Dr. Bronner's Peppermint Pure-Castile Soap 32 oz",
+     "seen_as": "Dr. Bronner's Peppermint Pure-Castile Liquid Soap",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Peppermint - Pure-Castile Magic Soap Peppermint - Pure-Castile Magic Soap [sold by Dr. Bronner's]",
+     "reason": ""
+    },
+    {
+     "item": "Cetaphil Gentle Skin Cleanser 16 fl oz",
+     "seen_as": "Cetaphil Gentle Skin Cleanser",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Cetaphil Gentle Skin Cleanser, 16 fl oz Cetaphil Gentle Skin Cleanser, 16 fl oz [sold by J5 Beauty & Co]",
+     "reason": ""
+    },
+    {
+     "item": "CeraVe Moisturizing Cream (tub)",
+     "seen_as": "CeraVe Moisturizing Cream",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Cerave Moisturizing Cream 236ml - TUBE. \u0633\u064a\u0631\u0627\u0641 \u0643\u0631\u064a\u0645 \u0645\u0631\u0637\u0628 Cerave Moisturizing Cream 236ml - TUBE. \u0633\u064a\u0631\u0627\u0641 \u0643\u0631\u064a\u0645 \u0645\u0631\u0637\u0628 [sold by",
+     "reason": ""
+    },
+    {
+     "item": "Native Deodorant Coconut & Vanilla",
+     "seen_as": "Native Coconut & Vanilla Deodorant",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Deodorant Stick Deodorant Stick [sold by Native]",
+     "reason": ""
+    },
+    {
+     "item": "The Ordinary Niacinamide serum",
+     "seen_as": "The Ordinary Facial Serum",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "The Ordinary Niacinamide 10% + Zinc 1% Serum The Ordinary Niacinamide 10% + Zinc 1% Serum [sold by Cloud 10 Beauty]",
+     "reason": ""
+    },
+    {
+     "item": "Burt's Bees Beeswax Lip Balm (one tube)",
+     "seen_as": "Burt's Bees Beeswax Lip Balm",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Burt's Bees Beeswax Lip Balm - 0.15 oz. Burt's Bees Beeswax Lip Balm - 0.15 oz. [sold by Weiner's LTD]",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Baseline",
+   "image": "bag.jpg",
+   "seconds": 6.9,
+   "found": 6,
+   "correct_pre": 4,
+   "wrong_pre": 1,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 1,
+   "similar_ok": 1,
+   "extra": 3,
+   "extra_pre": 3,
+   "items": [
+    {
+     "item": "Liquid I.V. Hydration Multiplier Lemon Lime",
+     "seen_as": "Liquid I.V. Hydration Multiplier Lemon Lime",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Lemon Lime Hydration Multiplier\u00ae Lemon Lime Hydration Multiplier\u00ae [sold by Liquid I.V. ]",
+     "reason": ""
+    },
+    {
+     "item": "Aquaphor Healing Ointment (tube)",
+     "seen_as": "Aquaphor Healing Ointment",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Aquaphor, Advanced Therapy, Healing Ointment, Fragrance Free , 2 Tubes, 0.35 oz (10 g) Each Aquaphor, Advanced Therapy, ",
+     "reason": ""
+    },
+    {
+     "item": "KIND nut bar (one bar)",
+     "seen_as": "KIND Nut Bar",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "KIND Bars, Nut Bar, Dark Chocolate Nuts & Sea Salt, 12 Bars, 1.4 oz (40 g) Each KIND Bars, Nut Bar, Dark Chocolate Nuts ",
+     "reason": ""
+    },
+    {
+     "item": "Advil (bottle)",
+     "seen_as": "Advil Pain Reliever",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Advil Liqui-Gels Ibuprofen Pain Relief (Bottle of 20) Advil Liqui-Gels Ibuprofen Pain Relief (Bottle of 20) [sold by MFI",
+     "reason": ""
+    },
+    {
+     "item": "Orbit gum (one pack)",
+     "seen_as": "Orbit Chewing Gum",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Orbit Peppermint Gum - 14 pieces Orbit Peppermint Gum - 14 pieces [sold by Weiner's LTD]",
+     "reason": ""
+    },
+    {
+     "item": "White wired earbuds (no readable brand)",
+     "seen_as": "Wired Earphones",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Original Apple - EarPods (USB-C) - White ( 1108063) (MSRP $39.99) Original Apple - EarPods (USB-C) - White ( 1108063) (M",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "USB Charging Cable",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Loopy Charging Cables - Lightning to USB-A (1.1m / 3.6ft) Loopy Charging Cables - Lightning to USB-A (1.1m / 3.6ft) [sol"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Gray Duffel Bag",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Gonex 50L Canvas Duffle Bag Gonex 50L Canvas Duffle Bag [sold by Gonex]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Ballpoint Pen",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Uni Jetstream Ballpoint Pen - Black - 0.7mm Uni Jetstream Ballpoint Pen - Black - 0.7mm [sold by Shibuya Stationery Stor"
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Baseline",
+   "image": "desk.jpg",
+   "seconds": 6.4,
+   "found": 8,
+   "correct_pre": 3,
+   "wrong_pre": 2,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 3,
+   "similar_ok": 3,
+   "extra": 1,
+   "extra_pre": 1,
+   "items": [
+    {
+     "item": "RXBAR Chocolate Sea Salt (open box of bars)",
+     "seen_as": "RXBAR Chocolate Sea Salt",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "RX Bar Chocolate Sea Salt, 1.8 oz RX Bar Chocolate Sea Salt, 1.8 oz [sold by BevMo!]",
+     "reason": ""
+    },
+    {
+     "item": "LaCroix Pamplemousse (one can)",
+     "seen_as": "LaCroix Pamplemousse",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "La Croix Pamplemousse La Croix Pamplemousse [sold by White Sands Treatment Center Fort Myers]",
+     "reason": ""
+    },
+    {
+     "item": "Hydro Flask Wide Mouth bottle, blue",
+     "seen_as": "Hydro Flask Water Bottle",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Standard Mouth Water Bottle with Flex Straw Cap, 24 oz Standard Mouth Water Bottle with Flex Straw Cap, 24 oz [sold by G",
+     "reason": ""
+    },
+    {
+     "item": "Altoids Peppermint (one tin)",
+     "seen_as": "Altoids Mints",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Altoids: PEPPERMINT MINTS 1.76oz. Tin Altoids: PEPPERMINT MINTS 1.76oz. Tin [sold by 4Noggins.com]",
+     "reason": ""
+    },
+    {
+     "item": "Post-it Notes, yellow",
+     "seen_as": "Post-it Notes",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Post-it 3 in. W X 3 in. L Assorted Sticky Notes 4 pad Post-it 3 in. W X 3 in. L Assorted Sticky Notes 4 pad [sold by Max",
+     "reason": ""
+    },
+    {
+     "item": "Anker power bank (model not readable)",
+     "seen_as": "Anker Power Bank",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Anker MagGo Power Bank (10K, Slim) Anker MagGo Power Bank (10K, Slim) [sold by Anker-US]",
+     "reason": ""
+    },
+    {
+     "item": "Black hardcover notebook (no brand)",
+     "seen_as": "Black Hardcover Notebook",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Basics Hardcover Notebook, Black, 192 Ruled Pages, 9 x 7.25 in Basics Hardcover Notebook, Black, 192 Ruled Pages, 9 x 7.",
+     "reason": ""
+    },
+    {
+     "item": "White ceramic mug (no brand)",
+     "seen_as": "White Coffee Mug",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "White Ceramic Mug \u2013 Minimalist Coffee Cup | 12oz Classic Everyday Mug White Ceramic Mug \u2013 Minimalist Coffee Cup | 12oz C",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Ballpoint Pen",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Uni Jetstream Ballpoint Pen - Black - 0.7mm Uni Jetstream Ballpoint Pen - Black - 0.7mm [sold by Shibuya Stationery Stor"
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Baseline",
+   "image": "table.jpg",
+   "seconds": 6.0,
+   "found": 5,
+   "correct_pre": 2,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 3,
+   "similar_ok": 3,
+   "extra": 3,
+   "extra_pre": 3,
+   "items": [
+    {
+     "item": "Louisiana Hot Sauce Original 6 oz",
+     "seen_as": "The Original Louisiana Hot Sauce",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Louisiana The Perfect Hot Sauce, 6 Fl Oz Louisiana The Perfect Hot Sauce, 6 Fl Oz [sold by ShelHealth]",
+     "reason": ""
+    },
+    {
+     "item": "Heinz Tomato Ketchup (one bottle)",
+     "seen_as": "Heinz Tomato Ketchup",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Heinz Tomato Ketchup Glass Bottle 375ml Heinz Tomato Ketchup Glass Bottle 375ml [sold by CanadaGroceryStore]",
+     "reason": ""
+    },
+    {
+     "item": "Glass salt shaker (no brand)",
+     "seen_as": "Glass Salt Shaker",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "White Glass & Metal Salt and Pepper Shakers White Glass & Metal Salt and Pepper Shakers [sold by My Store]",
+     "reason": ""
+    },
+    {
+     "item": "Small stainless creamer pitcher (no brand)",
+     "seen_as": "Stainless Steel Creamer",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Stainless Steel Milk Frothing Pitcher with Lid for Latte Coffee Art, Small 3oz Creamer Jug, Metal Barista Set, Mini Cup ",
+     "reason": ""
+    },
+    {
+     "item": "White mug (no brand)",
+     "seen_as": "White Ceramic Mug",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Nile Diner Mug Nile Diner Mug [sold by Nile Coffee Club]",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Tall Drinking Glass",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Large Water Glasses Set of 6 17.5oz \u2013 Clear Crystal Lightweight Borosilicate Drinking Glass Cups for Juice Iced Tea Moji"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Stainless Steel Spoon",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Winco Manhattan Dinner Spoon 18/0 Stainless Steel - 0008-03 Winco Manhattan Dinner Spoon 18/0 Stainless Steel - 0008-03 "
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Raw Sugar Packets",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "100ct Turbinado Raw Sugar Packets (brown) 100ct Turbinado Raw Sugar Packets (brown) [sold by Rich Coast Coffee]"
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Baseline",
+   "image": "hotsauce.jpg",
+   "seconds": 7.1,
+   "found": 1,
+   "correct_pre": 0,
+   "wrong_pre": 1,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 0,
+   "similar_ok": 0,
+   "extra": 9,
+   "extra_pre": 9,
+   "items": [
+    {
+     "item": "Cholula Original Hot Sauce",
+     "seen_as": "Cholula Hot Sauce",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Cholula\u00ae Reserva Tequila & Lime Hot Sauce, 5 fl oz Cholula\u00ae Reserva Tequila & Lime Hot Sauce, 5 fl oz [sold by McCormick",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Peace It's Hot! Hot Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "IT SAUCE Criolla Hot Sauce, 8oz (Mild) IT SAUCE Criolla Hot Sauce, 8oz (Mild) [sold by it sauce]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Blair's Death Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Blair's Original Death Hot Sauce Blair's Original Death Hot Sauce [sold by Chilly Chiles]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Trailer Trash Hot Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Trailer Trash Cayenne Pepper Hot Sauce Trailer Trash Cayenne Pepper Hot Sauce [sold by United Sauces.]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Jalapeno Hot Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Yellowbird Jalapeno Condiment Hot Sauce Yellowbird Jalapeno Condiment Hot Sauce [sold by All Things Barbecue]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Cayenne Hot Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "CaJohns Small Batch Garlic Cayenne Pepper Sauce CaJohns Small Batch Garlic Cayenne Pepper Sauce [sold by United Sauces.]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Fruit Hot Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Devil's Fruit Basket - Blueberries, Banana, Mango, Pineapple, Peach Hot Sauce - 5 fl oz (148ml) Devil's Fruit Basket - B"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Gourmet Salsa Jar",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Chilitos Salsa Jar Chilitos Salsa Jar [sold by Chilitoslc]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Spicy Seasoning Rub",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Hot Honey Rub Hot Honey Rub [sold by Rub This Dry Rubs]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Novelty Hot Sauce Bottle",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Funny Cat Name 4 Bottle Hot Sauce Gift Box Funny Cat Name 4 Bottle Hot Sauce Gift Box [sold by Fat Cat Gourmet Hot Sauce"
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Baseline",
+   "image": "shot_room.jpg",
+   "seconds": 5.1,
+   "found": 7,
+   "correct_pre": 0,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 7,
+   "similar_ok": 7,
+   "extra": 4,
+   "extra_pre": 4,
+   "items": [
+    {
+     "item": "Green velvet sofa",
+     "seen_as": "Green Velvet Sofa",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Harbord Sofa - Olive Green Velvet Harbord Sofa - Olive Green Velvet [sold by Hauser Company Stores]",
+     "reason": ""
+    },
+    {
+     "item": "Round walnut coffee table",
+     "seen_as": "Round Walnut Coffee Table",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Sidney Round Coffee Table - Solid Walnut Wood - Mid Century Modern Design Sidney Round Coffee Table - Solid Walnut Wood ",
+     "reason": ""
+    },
+    {
+     "item": "Brass arc floor lamp",
+     "seen_as": "Brass Arched Floor Lamp",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Verona Arc Floor Lamp with Glass Shade Verona Arc Floor Lamp with Glass Shade [sold by Hudson&Canal]",
+     "reason": ""
+    },
+    {
+     "item": "Cream boucle armchair",
+     "seen_as": "Cream Boucle Armchair",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Ashlie Boucl\u00e9 Swivel Barrel Chair Ashlie Boucl\u00e9 Swivel Barrel Chair [sold by Kinwell Furniture]",
+     "reason": ""
+    },
+    {
+     "item": "Jute area rug",
+     "seen_as": "Jute Area Rug",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Rigo Hand Woven Farmhouse Jute Area Rug Rigo Hand Woven Farmhouse Jute Area Rug [sold by nuLOOM]",
+     "reason": ""
+    },
+    {
+     "item": "White planter",
+     "seen_as": "White Planter with Stand",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Ceramic Planter On Wood Stand White/Dark Brown 4\" Ceramic Planter On Wood Stand White/Dark Brown 4\" [sold by Snakeroot B",
+     "reason": ""
+    },
+    {
+     "item": "Mustard throw pillow",
+     "seen_as": "Mustard Yellow Throw Pillow",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Velvet mustard yellow ruffle throw pillow Velvet mustard yellow ruffle throw pillow [sold by JaBella Designs]",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Textured Beige Throw Pillow",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Beige Textured Modern Woven 18\" Throw Pillow Beige Textured Modern Woven 18\" Throw Pillow [sold by Willow & Loom]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Geometric Throw Pillow",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Geometric White & Black Throw Pillow Geometric White & Black Throw Pillow [sold by Decora Home]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Brass Serving Tray",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Round Brass Tray Round Brass Tray [sold by roaniris.co]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Framed Abstract Wall Art",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Abstract Forms I Art Print Abstract Forms I Art Print [sold by The Print Emporium]"
+    }
+   ]
+  },
+  {
+   "run": 1,
+   "system": "Baseline",
+   "image": "shot_outfit.jpg",
+   "seconds": 5.4,
+   "found": 6,
+   "correct_pre": 0,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 6,
+   "similar_ok": 5,
+   "extra": 0,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Camel long wool coat",
+     "seen_as": "Camel Overcoat",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Camel Hair Wool Blend Women Wrap Overcoat Camel Hair Wool Blend Women Wrap Overcoat [sold by GOELIA]",
+     "reason": ""
+    },
+    {
+     "item": "Cream turtleneck sweater",
+     "seen_as": "Cream Turtleneck Sweater",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Cream Ribbed Turtleneck Side Slit Sweater Cream Ribbed Turtleneck Side Slit Sweater [sold by River & Rose]",
+     "reason": ""
+    },
+    {
+     "item": "Blue straight-leg jeans",
+     "seen_as": "Blue Straight-Leg Jeans",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "London High Rise Straight Leg Jean - Medium Wash London High Rise Straight Leg Jean - Medium Wash [sold by Fashion Nova]",
+     "reason": ""
+    },
+    {
+     "item": "White leather sneakers",
+     "seen_as": "White Sneakers",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Women's Premier Low Top | White Women's Premier Low Top | White [sold by Thursday Boot Company]",
+     "reason": ""
+    },
+    {
+     "item": "Black leather tote bag",
+     "seen_as": "Black Tote Bag",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Womens Leather Tote Shoulder Handbag Evelyn Black Womens Leather Tote Shoulder Handbag Evelyn Black [sold by House of Le",
+     "reason": ""
+    },
+    {
+     "item": "Round sunglasses",
+     "seen_as": "Round Sunglasses",
+     "result": "similar item of the WRONG kind (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Round Metal Frame - 9403T Round Metal Frame - 9403T [sold by The Sunglass Guy]",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Full pipeline",
+   "image": "bathroom.jpg",
+   "seconds": 36.4,
+   "found": 6,
+   "correct_pre": 5,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 1,
+   "similar_offered": 0,
+   "similar_ok": 0,
+   "extra": 2,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Dr. Bronner's Peppermint Pure-Castile Soap 32 oz",
+     "seen_as": "Dr. Bronner's Pure-Castile Soap Peppermint 32 oz",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Peppermint - Pure-Castile Magic Soap Peppermint - Pure-Castile Magic Soap [sold by Dr. Bronner's]",
+     "reason": ""
+    },
+    {
+     "item": "Cetaphil Gentle Skin Cleanser 16 fl oz",
+     "seen_as": "Cetaphil Gentle Skin Cleanser 16 FL OZ",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Cetaphil Gentle Skin Cleanser Normal To Dry Skin Unscented, 16-oz Pump Bottle (Each) Cetaphil Gentle Skin Cleanser Norma",
+     "reason": ""
+    },
+    {
+     "item": "CeraVe Moisturizing Cream (tub)",
+     "seen_as": "CeraVe Moisturizing Cream",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-4-neon",
+     "listing": "CeraVe Moisturizing Cream for Dry Skin CeraVe Moisturizing Cream for Dry Skin [sold by Exclusive Beauty Club]",
+     "reason": "Same CeraVe Moisturizing Cream tub with matching branding and seal"
+    },
+    {
+     "item": "Native Deodorant Coconut & Vanilla",
+     "seen_as": "Native Deodorant Coconut & Vanilla",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Native Natural Deodorant, Coconut & Vanilla, Aluminum Free, 2.65 oz Native Natural Deodorant, Coconut & Vanilla, Aluminu",
+     "reason": ""
+    },
+    {
+     "item": "The Ordinary Niacinamide serum",
+     "seen_as": "The Ordinary Serum",
+     "result": "held back although its top listing was right (one extra tap)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "The Ordinary Niacinamide 10% + Zinc 1% Serum The Ordinary Niacinamide 10% + Zinc 1% Serum [sold by Cloud 10 Beauty]",
+     "reason": "Same serum, but 60ml super size instead of 30ml"
+    },
+    {
+     "item": "Burt's Bees Beeswax Lip Balm (one tube)",
+     "seen_as": "Burt's Bees Beeswax Lip Balm",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Burt's Bees Beeswax Lip Balm - 0.15 oz. Burt's Bees Beeswax Lip Balm - 0.15 oz. [sold by Weiner's LTD]",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Toothpaste Tube white",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Crest, 3D White, Fluoride Anticavity Toothpaste, Advanced, Glamorous White, 2 Tubes, 3.3 oz (93 g) Each Crest, 3D White,"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Hair Tie black",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Womens Elastic Hair Tie - 27 Count, Black - 4MM for Medium Hair- Hair Accessories for Women Perfect for Long Lasting Bra"
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Full pipeline",
+   "image": "bag.jpg",
+   "seconds": 21.6,
+   "found": 6,
+   "correct_pre": 3,
+   "wrong_pre": 0,
+   "held_ok": 1,
+   "held_missed": 1,
+   "similar_offered": 1,
+   "similar_ok": 1,
+   "extra": 1,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Liquid I.V. Hydration Multiplier Lemon Lime",
+     "seen_as": "Liquid I.V. Hydration Multiplier Lemon Lime",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Lemon Lime Hydration Multiplier\u00ae Lemon Lime Hydration Multiplier\u00ae [sold by Liquid I.V. ]",
+     "reason": ""
+    },
+    {
+     "item": "Aquaphor Healing Ointment (tube)",
+     "seen_as": "Aquaphor Healing Ointment",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Aquaphor, Healing Ointment, Advanced Therapy, Skin Protectant, 1.75 oz (50 g) Aquaphor, Healing Ointment, Advanced Thera",
+     "reason": ""
+    },
+    {
+     "item": "KIND nut bar (one bar)",
+     "seen_as": "KIND Nut Bar",
+     "result": "correctly held back",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "KIND Bars, Nut Bar, Dark Chocolate Nuts & Sea Salt, 12 Bars, 1.4 oz (40 g) Each KIND Bars, Nut Bar, Dark Chocolate Nuts ",
+     "reason": "12-pack box, not a single bar"
+    },
+    {
+     "item": "Advil (bottle)",
+     "seen_as": "Advil Pain Reliever",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-4-neon",
+     "listing": "ADVIL Pain Relief - Ibuprofen 200 mg, 360 Tablets ADVIL Pain Relief - Ibuprofen 200 mg, 360 Tablets [sold by Wellspring ",
+     "reason": "Same Advil 200mg coated tablets bottle with blue cap"
+    },
+    {
+     "item": "Orbit gum (one pack)",
+     "seen_as": "Orbit Chewing Gum",
+     "result": "held back although its top listing was right (one extra tap)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "ORBIT Wintermint Sugar Free Chewing Gum, 12 Packs of 14 Pieces (168 Total) ORBIT Wintermint Sugar Free Chewing Gum, 12 P",
+     "reason": "12-pack of Wintermint, not a single pack"
+    },
+    {
+     "item": "White wired earbuds (no readable brand)",
+     "seen_as": "Apple EarPods White",
+     "result": "acceptable similar item (suggested)",
+     "status": "confirm",
+     "decided_by": "gemini-4-neon",
+     "listing": "Apple EarPods Apple EarPods [sold by Expercom]",
+     "reason": "Same white Apple EarPods with choice of Lightning or USB-C connector"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Duffel Bag Gray Canvas",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Canvas Duffel Bag, Vintage Canvas Weekender Bag Travel Bag Sports Duffel with Shoulder Strap Gray Canvas Duffel Bag, Vin"
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Full pipeline",
+   "image": "desk.jpg",
+   "seconds": 33.1,
+   "found": 8,
+   "correct_pre": 5,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 3,
+   "similar_ok": 3,
+   "extra": 1,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "RXBAR Chocolate Sea Salt (open box of bars)",
+     "seen_as": "RXBAR Protein Bar Chocolate Sea Salt",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "RXBAR Chocolate Sea Salt Protein Bar RXBAR Chocolate Sea Salt Protein Bar [sold by Pharmalynk Marketplace]",
+     "reason": ""
+    },
+    {
+     "item": "LaCroix Pamplemousse (one can)",
+     "seen_as": "LaCroix Sparkling Water Pamplemousse",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "LaCroix Pamplemousse Sparkling Water 12 fl oz LaCroix Pamplemousse Sparkling Water 12 fl oz [sold by Hudson Grocery Co-O",
+     "reason": ""
+    },
+    {
+     "item": "Hydro Flask Wide Mouth bottle, blue",
+     "seen_as": "Hydro Flask Wide Mouth Water Bottle Blue",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-4-neon",
+     "listing": "32oz Wide Mouth Hydroflask Water Bottle 32oz Wide Mouth Hydroflask Water Bottle [sold by Starr Mountain Outfitters]",
+     "reason": "Same Hydro Flask 32oz wide mouth bottle with flex cap and blue options"
+    },
+    {
+     "item": "Altoids Peppermint (one tin)",
+     "seen_as": "Altoids Peppermint Mints Peppermint",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Altoids Peppermint Mints - 1.76 oz. Altoids Peppermint Mints - 1.76 oz. [sold by Weiner's LTD]",
+     "reason": ""
+    },
+    {
+     "item": "Post-it Notes, yellow",
+     "seen_as": "Post-it Notes Canary Yellow",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-4-neon",
+     "listing": "Post-it Notes \u2014 3\" x 3\", Canary Yellow, 100 Sheets Post-it Notes \u2014 3\" x 3\", Canary Yellow, 100 Sheets [sold by Cowan\u2019s O",
+     "reason": "Same single pad of 3x3 inch Canary Yellow Post-it Notes."
+    },
+    {
+     "item": "Anker power bank (model not readable)",
+     "seen_as": "Anker Portable Charger Black",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Refurbished Anker 313 Power Bank (PowerCore 10K) Refurbished Anker <b>313</b> Power Bank (PowerCore 10K) [sold by Anker-",
+     "reason": "slimmer 10K model with fewer ports, refurbished"
+    },
+    {
+     "item": "Black hardcover notebook (no brand)",
+     "seen_as": "Hardcover Notebook Black",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Moleskine Classic Ruled Notebook, Large Black Hardcover, 192 Pages Moleskine Classic Ruled Notebook, Large Black Hardcov",
+     "reason": "Same black hardcover, rounded corners, elastic band, and single ribbon"
+    },
+    {
+     "item": "White ceramic mug (no brand)",
+     "seen_as": "Ceramic Coffee Mug White",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "11 oz Ceramic Coffee Mug White 11 oz Ceramic Coffee Mug White [sold by Mad Kat Custom Designs, LLC]",
+     "reason": "same plain white ceramic shape and handle"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Zip-Up Hoodie Black",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Tyson Zip Up Hoodie - Black Tyson Zip Up Hoodie - Black [sold by Fashion Nova]"
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Full pipeline",
+   "image": "table.jpg",
+   "seconds": 37.1,
+   "found": 5,
+   "correct_pre": 1,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 1,
+   "similar_offered": 3,
+   "similar_ok": 3,
+   "extra": 2,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Louisiana Hot Sauce Original 6 oz",
+     "seen_as": "Louisiana The Original Hot Sauce 6 fl oz",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Louisiana Original Sauce 177ml (6oz) Louisiana Original Sauce 177ml (6oz) [sold by Chile Mojo]",
+     "reason": ""
+    },
+    {
+     "item": "Heinz Tomato Ketchup (one bottle)",
+     "seen_as": "Heinz Tomato Ketchup",
+     "result": "held back although its top listing was right (one extra tap)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Heinz Original Tomato Ketchup 20oz Heinz Original Tomato Ketchup 20oz [sold by BevMo!]",
+     "reason": "20 oz plastic squeeze bottle, not the glass bottle"
+    },
+    {
+     "item": "Glass salt shaker (no brand)",
+     "seen_as": "Salt Shaker Clear Glass Metal Top",
+     "result": "acceptable similar item (suggested)",
+     "status": "confirm",
+     "decided_by": "gemini-decision-1",
+     "listing": "Tablecraft 657 2 Oz Glass Salt Pepper Shaker with Stainless Steel Top Tablecraft 657 2 Oz Glass Salt Pepper Shaker with ",
+     "reason": ""
+    },
+    {
+     "item": "Small stainless creamer pitcher (no brand)",
+     "seen_as": "Creamer Pitcher Stainless Steel",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Mini Stainless Steel Milk Pitcher \u2013 Pointed Spout Latte Art Jug Mini Stainless Steel Milk Pitcher \u2013 Pointed Spout Latte ",
+     "reason": "same bell shape and curved handle, slightly more pointed spout"
+    },
+    {
+     "item": "White mug (no brand)",
+     "seen_as": "Coffee Mug White Ceramic",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Coffee Mug - 11oz (white) Coffee Mug - 11oz (white) [sold by Bar Products ]",
+     "reason": "plain white ceramic, straighter bottom edge"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Drinking Glass Clear Glass",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Celina Glass Set of 8 (4 Tall + 4 Short) - Clear Celina Glass Set of 8 (4 Tall + 4 Short) - Clear [sold by stonelain.co]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Spoon Stainless Steel",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Stainless Steel Dessert Spoon Stainless Steel Dessert Spoon [sold by MUJI USA]"
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Full pipeline",
+   "image": "hotsauce.jpg",
+   "seconds": 19.3,
+   "found": 1,
+   "correct_pre": 1,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 0,
+   "similar_ok": 0,
+   "extra": 3,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Cholula Original Hot Sauce",
+     "seen_as": "Cholula Hot Sauce Original",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "gemini-decision-1",
+     "listing": "Cholula Original Hot Sauce - 5oz Cholula Original Hot Sauce - 5oz [sold by BevMo!]",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Hot Sauce Peace It's Hot",
+     "result": "not pre-selected",
+     "status": "none",
+     "listing": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Hot Sauce Yellow Box",
+     "result": "not pre-selected",
+     "status": "none",
+     "listing": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Salsa Jar",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Chilpotle Salsa - Single Jar Chilpotle Salsa - Single Jar [sold by Blue Agave Club - Sonrisa Salsa]"
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Full pipeline",
+   "image": "shot_room.jpg",
+   "seconds": 38.1,
+   "found": 7,
+   "correct_pre": 0,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 7,
+   "similar_ok": 7,
+   "extra": 3,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Green velvet sofa",
+     "seen_as": "Sofa green velvet mid-century modern",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Nicholi 84\" Mid Century Modern Sofa, Olive Green Performance Velvet Olive Green Foam Velvet 3 Seat Nicholi 84\" Mid Centu",
+     "reason": "olive green instead of forest green, smooth bench seat without tufting"
+    },
+    {
+     "item": "Round walnut coffee table",
+     "seen_as": "Coffee Table round walnut mid-century modern",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Round Coffee Table, 39\" Circle Center Table with Reinforced Cross Brace Round Coffee Table, 39\" Circle Center Table with",
+     "reason": "thicker rectangular legs instead of slim round legs"
+    },
+    {
+     "item": "Brass arc floor lamp",
+     "seen_as": "Arc Floor Lamp brushed brass",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Teamson Home Arquer Arc 68\" Metal Floor Lamp with Bell Shade, Antique Brass Teamson Home Arquer Arc 68\" Metal Floor Lamp",
+     "reason": "same arc and brass dome shade, darker stem and base"
+    },
+    {
+     "item": "Cream boucle armchair",
+     "seen_as": "Armchair cream white boucle",
+     "result": "acceptable similar item (suggested)",
+     "status": "confirm",
+     "decided_by": "gemini-decision-1",
+     "listing": "Everitte Boucl\u00e9 Swivel Barrel Chair Everitte Boucl\u00e9 Swivel Barrel Chair [sold by Kinwell Furniture]",
+     "reason": ""
+    },
+    {
+     "item": "Jute area rug",
+     "seen_as": "Area Rug natural woven jute",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Rigo Hand Woven Farmhouse Jute Area Rug Rigo Hand Woven Farmhouse Jute Area Rug [sold by nuLOOM]",
+     "reason": "same natural colour and chunky woven jute texture"
+    },
+    {
+     "item": "White planter",
+     "seen_as": "Planter with Stand white ceramic pot walnut wood stand",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "D'vine Dev Ceramic Planter with Natural Stand - 10 Inch Modern Round Flower Pot with Wood Planter Holder, White, 55-B-K-",
+     "reason": "same smooth white pot, lighter wood stand wraps around sides"
+    },
+    {
+     "item": "Mustard throw pillow",
+     "seen_as": "Throw Pillow mustard yellow",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Light Mustard Yellow Solid Colour Throw Pillow Light Mustard Yellow Solid Colour Throw Pillow [sold by Society6]",
+     "reason": "lighter yellow, smoother non-velvet fabric"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Throw Pillow beige textured",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Beige Textured Modern Woven 18\" Throw Pillow Beige Textured Modern Woven 18\" Throw Pillow [sold by Willow & Loom]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Throw Pillow geometric patterned",
+     "result": "not pre-selected",
+     "status": "similar",
+     "listing": "Grahamston Brown Geometric Pattern Throw Pillow - Clearance Grahamston Brown Geometric Pattern Throw Pillow - Clearance "
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Framed Wall Art abstract wood frame",
+     "result": "not pre-selected",
+     "status": "none",
+     "listing": ""
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Full pipeline",
+   "image": "shot_outfit.jpg",
+   "seconds": 38.5,
+   "found": 6,
+   "correct_pre": 0,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 5,
+   "similar_ok": 5,
+   "extra": 0,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Camel long wool coat",
+     "seen_as": "Wool Overcoat camel wool long",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Women's Timeless Camel Long Wool Coat Women's Timeless Camel Long Wool Coat [sold by Lors Boutique]",
+     "reason": "same camel colour and long cut, slightly more relaxed fit"
+    },
+    {
+     "item": "Cream turtleneck sweater",
+     "seen_as": "Turtleneck Sweater cream ribbed knit",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Marine Layer Women's Cream Wool Rib Knit Turtleneck Long Sleeve Sweater Top XS Marine Layer Women's Cream Wool Rib Knit ",
+     "reason": "same cream rib knit, but diagonal ribbing instead of vertical"
+    },
+    {
+     "item": "Blue straight-leg jeans",
+     "seen_as": "Denim Jeans blue straight leg",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Womens Straight Leg Denim Jeans in Mid Blue Womens Straight Leg Denim Jeans in Mid Blue [sold by ARNE]",
+     "reason": "Same high-waisted straight cut, lighter blue wash"
+    },
+    {
+     "item": "White leather sneakers",
+     "seen_as": "Low-Top Sneakers white leather",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Women's Premier Low Top | White Women's Premier Low Top | White [sold by Thursday Boot Company]",
+     "reason": "tan interior lining and metal eyelets, same minimalist white style"
+    },
+    {
+     "item": "Black leather tote bag",
+     "seen_as": "Tote Bag black leather",
+     "result": "acceptable similar item (suggested)",
+     "status": "similar",
+     "decided_by": "gemini-4-neon",
+     "listing": "Everyday Tote | Black (S) (Zipper) Everyday Tote | Black (S) (Zipper) [sold by Thursday Boot Company]",
+     "reason": "same smooth black leather and minimalist tote shape"
+    },
+    {
+     "item": "Round sunglasses",
+     "seen_as": "Sunglasses round dark lens",
+     "result": "nothing offered",
+     "status": "none",
+     "decided_by": "gemini-decision-1",
+     "listing": "",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Baseline",
+   "image": "bathroom.jpg",
+   "seconds": 6.5,
+   "found": 6,
+   "correct_pre": 4,
+   "wrong_pre": 2,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 0,
+   "similar_ok": 0,
+   "extra": 0,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Dr. Bronner's Peppermint Pure-Castile Soap 32 oz",
+     "seen_as": "Dr. Bronner's Peppermint Pure-Castile Soap",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Peppermint - Pure-Castile Magic Soap Peppermint - Pure-Castile Magic Soap [sold by Dr. Bronner's]",
+     "reason": ""
+    },
+    {
+     "item": "Cetaphil Gentle Skin Cleanser 16 fl oz",
+     "seen_as": "Cetaphil Gentle Skin Cleanser",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Cetaphil Gentle Skin Cleanser Lotion, Unscented, 16 fl oz Cetaphil Gentle Skin Cleanser Lotion, Unscented, 16 fl oz [sol",
+     "reason": ""
+    },
+    {
+     "item": "CeraVe Moisturizing Cream (tub)",
+     "seen_as": "CeraVe Moisturizing Cream",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "CeraVe Moisturising Cream For Dry to Very Dry Skin CeraVe Moisturising Cream For Dry to Very Dry Skin [sold by Cloud 10 ",
+     "reason": ""
+    },
+    {
+     "item": "Native Deodorant Coconut & Vanilla",
+     "seen_as": "Native Coconut & Vanilla Deodorant",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Deodorant Stick Deodorant Stick [sold by Native]",
+     "reason": ""
+    },
+    {
+     "item": "The Ordinary Niacinamide serum",
+     "seen_as": "The Ordinary Facial Serum",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "The Ordinary Niacinamide 10% + Zinc 1% Serum The Ordinary Niacinamide 10% + Zinc 1% Serum [sold by Cloud 10 Beauty]",
+     "reason": ""
+    },
+    {
+     "item": "Burt's Bees Beeswax Lip Balm (one tube)",
+     "seen_as": "Burt's Bees Beeswax Lip Balm",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Burt's Bees Beeswax Lip Balm - 0.15 oz. Burt's Bees Beeswax Lip Balm - 0.15 oz. [sold by Weiner's LTD]",
+     "reason": ""
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Baseline",
+   "image": "bag.jpg",
+   "seconds": 5.3,
+   "found": 6,
+   "correct_pre": 3,
+   "wrong_pre": 2,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 1,
+   "similar_ok": 1,
+   "extra": 3,
+   "extra_pre": 3,
+   "items": [
+    {
+     "item": "Liquid I.V. Hydration Multiplier Lemon Lime",
+     "seen_as": "Liquid I.V. Hydration Multiplier",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Lemon Lime Hydration Multiplier\u00ae Lemon Lime Hydration Multiplier\u00ae [sold by Liquid I.V. ]",
+     "reason": ""
+    },
+    {
+     "item": "Aquaphor Healing Ointment (tube)",
+     "seen_as": "Aquaphor Healing Ointment",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Aquaphor, Advanced Therapy, Healing Ointment, Fragrance Free , 2 Tubes, 0.35 oz (10 g) Each Aquaphor, Advanced Therapy, ",
+     "reason": ""
+    },
+    {
+     "item": "KIND nut bar (one bar)",
+     "seen_as": "KIND Nut Bar",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "KIND Bars, Nut Bar, Dark Chocolate Nuts & Sea Salt, 12 Bars, 1.4 oz (40 g) Each KIND Bars, Nut Bar, Dark Chocolate Nuts ",
+     "reason": ""
+    },
+    {
+     "item": "Advil (bottle)",
+     "seen_as": "Advil Pain Reliever",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Advil Ibuprofen Pain Relief and Fever Reducer Tablets Advil Ibuprofen Pain Relief and Fever Reducer Tablets [sold by Sho",
+     "reason": ""
+    },
+    {
+     "item": "Orbit gum (one pack)",
+     "seen_as": "Orbit Chewing Gum",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Orbit Bubblemint Sugar-Free Chewing Gum \u2013 Clutter-Free Pantry and Desk Storage, 120 ct Slim Resealable Bottle Orbit Bubb",
+     "reason": ""
+    },
+    {
+     "item": "White wired earbuds (no readable brand)",
+     "seen_as": "Wired Earbuds",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Apple Wired EarPods with Lightning Connector Apple Wired EarPods with Lightning Connector [sold by BevMo!]",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "USB Charging Cable",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Tough On USB A to Lightning Cable 2.4A Fast Charging Cable Tough On USB A to Lightning Cable 2.4A Fast Charging Cable [s"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Ballpoint Pen",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Uni Jetstream Ballpoint Pen - Black - 0.7mm Uni Jetstream Ballpoint Pen - Black - 0.7mm [sold by Shibuya Stationery Stor"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Grey Duffel Bag",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Gonex 50L Canvas Duffle Bag Gonex 50L Canvas Duffle Bag [sold by Gonex]"
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Baseline",
+   "image": "desk.jpg",
+   "seconds": 5.7,
+   "found": 8,
+   "correct_pre": 2,
+   "wrong_pre": 3,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 3,
+   "similar_ok": 3,
+   "extra": 2,
+   "extra_pre": 2,
+   "items": [
+    {
+     "item": "RXBAR Chocolate Sea Salt (open box of bars)",
+     "seen_as": "RXBAR Chocolate Sea Salt",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "RX Bar Chocolate Sea Salt, 1.8 oz RX Bar Chocolate Sea Salt, 1.8 oz [sold by BevMo!]",
+     "reason": ""
+    },
+    {
+     "item": "LaCroix Pamplemousse (one can)",
+     "seen_as": "LaCroix Pamplemousse",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "La Croix Pamplemousse Pink Grapefruit 12oz 12 Pack Cans La Croix Pamplemousse Pink Grapefruit 12oz 12 Pack Cans [sold by",
+     "reason": ""
+    },
+    {
+     "item": "Hydro Flask Wide Mouth bottle, blue",
+     "seen_as": "Blue Hydro Flask",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "32 oz Wide Mouth with Flex Straw Cap 32 oz Wide Mouth with Flex Straw Cap [sold by Sports Basement]",
+     "reason": ""
+    },
+    {
+     "item": "Altoids Peppermint (one tin)",
+     "seen_as": "Altoids Peppermint",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Altoids: PEPPERMINT MINTS 1.76oz. Tin Altoids: PEPPERMINT MINTS 1.76oz. Tin [sold by 4Noggins.com]",
+     "reason": ""
+    },
+    {
+     "item": "Post-it Notes, yellow",
+     "seen_as": "Post-it Notes",
+     "result": "WRONG, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "M3 Post It Note 3x3 Yellow M3 Post It Note 3x3 Yellow [sold by JA Riollano Co, Inc.  School I Office I Crafts I Copies]",
+     "reason": ""
+    },
+    {
+     "item": "Anker power bank (model not readable)",
+     "seen_as": "Anker Power Bank",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Anker MagGo Power Bank (10K, Slim) Anker MagGo Power Bank (10K, Slim) [sold by Anker-US]",
+     "reason": ""
+    },
+    {
+     "item": "Black hardcover notebook (no brand)",
+     "seen_as": "Black Hardcover Notebook",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Moleskine Classic Hardcover Notebook - Black Moleskine Classic Hardcover Notebook - Black [sold by Jenni Bick Custom Jou",
+     "reason": ""
+    },
+    {
+     "item": "White ceramic mug (no brand)",
+     "seen_as": "White Coffee Mug",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "White Ceramic Mug \u2013 Minimalist Coffee Cup | 12oz Classic Everyday Mug White Ceramic Mug \u2013 Minimalist Coffee Cup | 12oz C",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Black Pen",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Pilot G2 Gel Pens, Black Ink, Fine, 0.7 mm 4 each Pilot G2 Gel Pens, Black Ink, Fine, 0.7 mm 4 each [sold by Crabtree Re"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Laptop",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Apple MacBook Pro 14\" M5 chip 16GB RAM 1TB SSD Space Black MDE14LL/A 2025 Model Apple MacBook Pro 14\" M5 chip 16GB RAM 1"
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Baseline",
+   "image": "table.jpg",
+   "seconds": 4.9,
+   "found": 5,
+   "correct_pre": 2,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 3,
+   "similar_ok": 3,
+   "extra": 3,
+   "extra_pre": 3,
+   "items": [
+    {
+     "item": "Louisiana Hot Sauce Original 6 oz",
+     "seen_as": "The Original Louisiana Brand Hot Sauce",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Louisiana Original Sauce 177ml (6oz) Louisiana Original Sauce 177ml (6oz) [sold by Chile Mojo]",
+     "reason": ""
+    },
+    {
+     "item": "Heinz Tomato Ketchup (one bottle)",
+     "seen_as": "Heinz Tomato Ketchup",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Heinz Tomato Ketchup Glass Bottle 375ml Heinz Tomato Ketchup Glass Bottle 375ml [sold by CanadaGroceryStore]",
+     "reason": ""
+    },
+    {
+     "item": "Glass salt shaker (no brand)",
+     "seen_as": "Glass Salt Shaker",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Glass Salt and Pepper Shakers Glass Salt and Pepper Shakers [sold by Nalata Nalata]",
+     "reason": ""
+    },
+    {
+     "item": "Small stainless creamer pitcher (no brand)",
+     "seen_as": "Metal Creamer Pitcher",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Stainless Steel Milk Frothing Pitcher with Lid for Latte Coffee Art, Small 3oz Creamer Jug, Metal Barista Set, Mini Cup ",
+     "reason": ""
+    },
+    {
+     "item": "White mug (no brand)",
+     "seen_as": "White Ceramic Mug",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Ceramic Diner Mugs Ceramic Diner Mugs [sold by COLETTI Coffee]",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Tall Drinking Glass",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Floral Etched Drinking Glass-Tall Floral Etched Drinking Glass-Tall [sold by Cetohome]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Stainless Steel Spoon",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Stainless Steel Table Spoon Stainless Steel Table Spoon [sold by MUJI USA]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Brown Sugar Packet",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Caffe Kimbo - Brown Sugar Packets - 100 Count (0.71 Lb) Caffe Kimbo - Brown Sugar Packets - 100 Count (0.71 Lb) [sold by"
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Baseline",
+   "image": "hotsauce.jpg",
+   "seconds": 6.5,
+   "found": 1,
+   "correct_pre": 1,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 0,
+   "similar_ok": 0,
+   "extra": 8,
+   "extra_pre": 8,
+   "items": [
+    {
+     "item": "Cholula Original Hot Sauce",
+     "seen_as": "Cholula Hot Sauce",
+     "result": "correct, pre-selected",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Cholula Hot Sauce - 12oz Cholula Hot Sauce - 12oz [sold by Chilly Chiles]",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Peace It's Hot! Hot Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "IT SAUCE Criolla Hot Sauce, 8oz (Mild) IT SAUCE Criolla Hot Sauce, 8oz (Mild) [sold by it sauce]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Jalapeno Hot Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "El Yucateco Green Jalape\u00f1o Hot Sauce \u2013 5 fl oz El Yucateco Green Jalape\u00f1o Hot Sauce \u2013 5 fl oz [sold by MexGrocer.com]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Cayenne Hot Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "CaJohns Small Batch Garlic Cayenne Pepper Sauce CaJohns Small Batch Garlic Cayenne Pepper Sauce [sold by United Sauces.]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Blair's Death Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Blair's Original Death Hot Sauce Blair's Original Death Hot Sauce [sold by Chilly Chiles]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Spicy Salsa",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Gourmet Homemade Salsa | Choose From Ultra-Spicy, Medium-Hot, or Sweet Peach Salsa | All-Natural Artisan Mason Jar Salsa"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Spicy Seasoning Shaker",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Hot Honey Rub Hot Honey Rub [sold by Rub This Dry Rubs]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Habanero Hot Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "El Yucateco Habanero & Ghost Pepper Hot Sauce 4 Ounce Glass Bottle El Yucateco Habanero & Ghost Pepper Hot Sauce 4 Ounce"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Fruit Hot Sauce",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Devil's Fruit Basket - Blueberries, Banana, Mango, Pineapple, Peach Hot Sauce - 5 fl oz (148ml) Devil's Fruit Basket - B"
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Baseline",
+   "image": "shot_room.jpg",
+   "seconds": 5.9,
+   "found": 7,
+   "correct_pre": 0,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 7,
+   "similar_ok": 6,
+   "extra": 3,
+   "extra_pre": 3,
+   "items": [
+    {
+     "item": "Green velvet sofa",
+     "seen_as": "Green Velvet Sofa",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Harbord Sofa - Olive Green Velvet Harbord Sofa - Olive Green Velvet [sold by Hauser Company Stores]",
+     "reason": ""
+    },
+    {
+     "item": "Round walnut coffee table",
+     "seen_as": "Round Walnut Coffee Table",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Sidney Round Coffee Table - Solid Walnut Wood - Mid Century Modern Design Sidney Round Coffee Table - Solid Walnut Wood ",
+     "reason": ""
+    },
+    {
+     "item": "Brass arc floor lamp",
+     "seen_as": "Brass Arc Floor Lamp",
+     "result": "similar item of the WRONG kind (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Olivia Floor Lamp Olivia Floor Lamp [sold by Brightech]",
+     "reason": ""
+    },
+    {
+     "item": "Cream boucle armchair",
+     "seen_as": "Cream Boucle Armchair",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Best Quality Furniture Cream Boucle Swivel Accent Barrel Chair Best Quality Furniture Cream Boucle Swivel Accent Barrel ",
+     "reason": ""
+    },
+    {
+     "item": "Jute area rug",
+     "seen_as": "Woven Jute Area Rug",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Pata Hand Woven Chunky Jute With Fringe Area Rug Pata Hand Woven Chunky Jute With Fringe Area Rug [sold by JONATHAN Y]",
+     "reason": ""
+    },
+    {
+     "item": "White planter",
+     "seen_as": "White Planter with Wood Stand",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Ceramic Planter On Wood Stand White/Dark Brown 4\" Ceramic Planter On Wood Stand White/Dark Brown 4\" [sold by Snakeroot B",
+     "reason": ""
+    },
+    {
+     "item": "Mustard throw pillow",
+     "seen_as": "Mustard Yellow Throw Pillow",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Velvet mustard yellow ruffle throw pillow Velvet mustard yellow ruffle throw pillow [sold by JaBella Designs]",
+     "reason": ""
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Beige Textured Throw Pillow",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "Beige Textured Modern Woven 18\" Throw Pillow Beige Textured Modern Woven 18\" Throw Pillow [sold by Willow & Loom]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Round Brass Decorative Tray",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "antique brass decorative trays antique brass decorative trays [sold by parker + gibbs]"
+    },
+    {
+     "item": "(not in answer key)",
+     "seen_as": "Framed Abstract Wall Art",
+     "result": "pre-selected, unscored",
+     "status": "auto",
+     "listing": "3 Piece Mid Century Modern Abstract Earth Tones Brown Cream Navy Framed Wall Art 3 Piece Mid Century Modern Abstract Ear"
+    }
+   ]
+  },
+  {
+   "run": 2,
+   "system": "Baseline",
+   "image": "shot_outfit.jpg",
+   "seconds": 4.2,
+   "found": 6,
+   "correct_pre": 0,
+   "wrong_pre": 0,
+   "held_ok": 0,
+   "held_missed": 0,
+   "similar_offered": 6,
+   "similar_ok": 6,
+   "extra": 0,
+   "extra_pre": 0,
+   "items": [
+    {
+     "item": "Camel long wool coat",
+     "seen_as": "Camel Wool Coat",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Women's Timeless Camel Long Wool Coat Women's Timeless Camel Long Wool Coat [sold by Lors Boutique]",
+     "reason": ""
+    },
+    {
+     "item": "Cream turtleneck sweater",
+     "seen_as": "Cream Turtleneck Sweater",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Cream Anytime Ribbed Turtleneck Cream Anytime Ribbed Turtleneck [sold by JLUXLABEL]",
+     "reason": ""
+    },
+    {
+     "item": "Blue straight-leg jeans",
+     "seen_as": "Blue Straight-Leg Jeans",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Kiss And Tell High Rise Low Stretch Straight Leg Jeans - Light Blue Wash Kiss And Tell High Rise Low Stretch Straight Le",
+     "reason": ""
+    },
+    {
+     "item": "White leather sneakers",
+     "seen_as": "White Sneakers",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Premier Low Top | White Premier Low Top | White [sold by Thursday Boot Company]",
+     "reason": ""
+    },
+    {
+     "item": "Black leather tote bag",
+     "seen_as": "Black Tote Bag",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Womens Leather Tote Shoulder Handbag Evelyn Black Womens Leather Tote Shoulder Handbag Evelyn Black [sold by House of Le",
+     "reason": ""
+    },
+    {
+     "item": "Round sunglasses",
+     "seen_as": "Round Sunglasses",
+     "result": "acceptable similar item (put in the cart unasked)",
+     "status": "auto",
+     "decided_by": "first search result",
+     "listing": "Thin Frame Sunglasses Thin Frame Sunglasses [sold by My Sister's Cottage]",
+     "reason": ""
+    }
+   ]
+  }
+ ]
+}
