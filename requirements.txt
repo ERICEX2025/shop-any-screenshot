@@ -1,0 +1,6 @@
+google-genai==3.6.1
+fastapi
+uvicorn
+httpx
+pillow
+python-dotenv
