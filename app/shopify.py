@@ -12,13 +12,19 @@ import httpx
 URL = "https://mcp.shop.com/"
 PROTO = "2026-07-28"
 _http = httpx.Client(timeout=40)
+_token = None  # Shop access token after an optional "Sign in with Shop" (app/shopauth.py). Memory only, never logged or saved.
+
+
+def set_token(tok):
+    global _token
+    _token = tok or None
 
 
 class ShopError(RuntimeError):
     pass
 
 
-def call(tool, arguments, retries=2):
+def call(tool, arguments, retries=2, need_auth=False):
     body = {
         "jsonrpc": "2.0", "id": 1, "method": "tools/call",
         "params": {
@@ -35,7 +41,11 @@ def call(tool, arguments, retries=2):
         "MCP-Protocol-Version": PROTO, "Mcp-Method": "tools/call", "Mcp-Name": tool,
     }
     for attempt in range(retries + 1):
-        r = _http.post(URL, json=body, headers=headers)
+        auth = {"Authorization": "Bearer " + _token} if _token else {}
+        r = _http.post(URL, json=body, headers={**headers, **auth})
+        if r.status_code == 401 and auth and not need_auth:
+            set_token(None)  # an expired token fails the call instead of running signed out: drop it and go on anonymously
+            continue
         if r.status_code == 429 and attempt < retries:
             time.sleep(min(float(r.headers.get("Retry-After", 1.5)), 5))
             continue
@@ -55,6 +65,33 @@ def call(tool, arguments, retries=2):
     return res["structuredContent"]
 
 
+def _cand(p, v):
+    """One offer (a product and one of its variants) as the flat dict the rest of the app uses."""
+    price, lp = v.get("price") or {}, v.get("list_price") or {}
+    media = v.get("media") or p.get("media") or [{}]
+    seller = v.get("seller") or {}
+    return {
+        "product_id": p["id"],
+        "variant_id": v["id"],
+        "title": re.sub(r"<[^>]+>", "", p.get("title", "")).strip(),
+        "variant_title": v.get("title", ""),
+        "options": {o["name"]: [x["label"] for x in o.get("values", [])][:8] for o in p.get("options", [])},
+        "selected": {o["name"]: o["label"] for o in v.get("options") or []},   # the option values of THIS variant
+        "price": price.get("amount"),
+        "currency": price.get("currency"),
+        # list_price is the merchant's compare-at price: when it is higher than price the item is discounted
+        "list_price": lp.get("amount") if lp.get("currency") == price.get("currency") and (lp.get("amount") or 0) > (price.get("amount") or 0) else None,
+        "available": (v.get("availability") or {}).get("available"),   # True, False, or None when the API does not say
+        "image": media[0].get("url", ""),
+        "url": v.get("url", ""),
+        "seller": seller.get("name", ""),
+        "shop": seller.get("domain", ""),
+        "shop_url": seller.get("url", ""),
+        "rating": (p.get("rating") or {}).get("value"),
+        "rating_count": (p.get("rating") or {}).get("count"),
+    }
+
+
 def search(query, country="US", currency="USD", limit=6):
     """Global Catalog search across Shopify merchants. Returns flat candidates (one featured variant each)."""
     d = call("search_catalog", {"catalog": {
@@ -68,27 +105,30 @@ def search(query, country="US", currency="USD", limit=6):
         v = (p.get("variants") or [None])[0]
         if not v:
             continue
-        price = v.get("price") or {}
-        if price.get("currency") != currency:  # context is a soft hint: some offers come back in other currencies
+        if (v.get("price") or {}).get("currency") != currency:  # context is a soft hint: some offers come back in other currencies
             continue
-        media = v.get("media") or p.get("media") or [{}]
-        seller = v.get("seller") or {}
-        out.append({
-            "product_id": p["id"],
-            "variant_id": v["id"],
-            "title": re.sub(r"<[^>]+>", "", p.get("title", "")).strip(),
-            "variant_title": v.get("title", ""),
-            "options": {o["name"]: [x["label"] for x in o.get("values", [])][:8] for o in p.get("options", [])},
-            "price": price.get("amount"),
-            "currency": price.get("currency"),
-            "image": media[0].get("url", ""),
-            "url": v.get("url", ""),
-            "seller": seller.get("name", ""),
-            "shop": seller.get("domain", ""),
-            "rating": (p.get("rating") or {}).get("value"),
-            "rating_count": (p.get("rating") or {}).get("count"),
-        })
+        out.append(_cand(p, v))
     return out
+
+
+def product(product_id, selected=None, country="US", currency="USD"):
+    """A listing's real options (colour, size...) with per-value availability and swatch photos, and the variant that
+    the given selection resolves to. selected: {option name: label}. Verified Nov 21 2026: about 0.2 s, no key."""
+    cat = {"id": product_id, "context": {"address_country": country, "currency": currency}}
+    if selected:
+        cat["selected"] = [{"name": k, "label": v} for k, v in selected.items()]
+    p = call("get_product", {"catalog": cat})["product"]
+    v = (p.get("variants") or [None])[0]
+    cand = _cand(p, v) if v else None
+    if cand and selected and any(cand["selected"].get(k) != val for k, val in selected.items()):
+        cand["dropped"] = True   # Shopify may relax a selection that does not exist: tell the page it is not what was asked
+    return {
+        "options": [{"name": o["name"], "values": [{
+            "label": x["label"], "available": x.get("available"), "exists": x.get("exists", True),
+            "swatch": (x.get("swatch") or {}).get("image_url") or "", "color": (x.get("swatch") or {}).get("color") or "",
+        } for x in o.get("values", [])][:24]} for o in p.get("options", [])],
+        "variant": cand,
+    }
 
 
 def _lines(items):

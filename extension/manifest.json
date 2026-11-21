@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "ShelfCart: shop this image",
+  "version": "1.0.0",
+  "description": "Right-click any image to find the real products in it on Shopify, change them, and build a cart. Needs the ShelfCart server on localhost:8202.",
+  "minimum_chrome_version": "116",
+  "permissions": ["contextMenus", "sidePanel", "activeTab", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "side_panel": { "default_path": "panel.html" },
+  "action": { "default_title": "Shop what is on this page (captures the visible tab)", "default_icon": { "16": "icons/16.png", "32": "icons/32.png" } },
+  "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" }
+}

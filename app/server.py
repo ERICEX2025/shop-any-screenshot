@@ -1,4 +1,4 @@
-"""ShelfCart: shop any screenshot (or camera pan). Items in the image become real, buyable Shopify products.
+"""ShelfCart: shop any image on the web, change an item to how you want it, buy the real thing.
 
 Hydrogen    looks at 1 to 5 camera frames and lists the distinct products (brand, type, size, box, search query).
 Shop MCP    searches Shopify's Global Catalog for each product (real, no API key).
@@ -7,30 +7,36 @@ Neon        second look whenever Decision 1 has no confident exact match (common
             reads the crop and the listings carefully, checks pack size and variant, then confirms an exact listing,
             or picks the closest SIMILAR item with one line on how it differs, or says nothing is close.
             Only confident exact matches are pre-selected; similar items are suggestions the user has to tick.
+Remix       Hydrogen suggests variations of an item (or the shopper types one, or picks a real option the merchant
+            sells); Shopify is searched for the new version and Gemini's image model redraws the picture (app/remix.py).
 Shop MCP    builds one cart per merchant, and a checkout session only when the user asks. We never complete a checkout.
 Run: uvicorn app.server:app --port 8202
 """
 import base64
+import hashlib
 import io
 import json
 import pathlib
+import re
+import threading
 import time
 
 import httpx
-from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, as_completed, wait
 
 from dotenv import load_dotenv
 
 ROOT = pathlib.Path(__file__).parent.parent
 load_dotenv(ROOT / ".env")
 
-from fastapi import FastAPI, HTTPException  # noqa: E402
-from fastapi.responses import FileResponse  # noqa: E402
+from fastapi import FastAPI, HTTPException, Request  # noqa: E402
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse  # noqa: E402
+from fastapi.staticfiles import StaticFiles  # noqa: E402
 from google import genai  # noqa: E402
-from PIL import Image  # noqa: E402
+from PIL import Image, ImageChops  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
 
-from . import shopify  # noqa: E402
+from . import remix, shopauth, shopify  # noqa: E402
 
 HYDROGEN, NEON, DECISION = "gemini-4-hydrogen", "gemini-4-neon", "gemini-decision-1"
 NEON_TIMEOUT = 30  # seconds; after that the item keeps Decision 1's verdict
@@ -240,22 +246,24 @@ def _thumb(url):
         return None
 
 
-def review(crop_b64, product, cands):
-    """Neon's second look when Decision 1 has no confident exact match: confirm an exact one, pick the closest similar item, or nothing."""
+def review(crop_b64, product, cands, prompt=None):
+    """Neon's second look when Decision 1 has no confident exact match: confirm an exact one, pick the closest similar item, or nothing.
+    prompt: a different instruction text with a {listings} slot (the remix review uses this)."""
     lines = []
     for i, c in enumerate(cands):
         opts = "; ".join(f"{k}: {', '.join(v)}" for k, v in c["options"].items())
         price = f"${c['price'] / 100:.2f}" if c.get("price") is not None else "?"
         lines.append(f"{i}. {c['title']}" + (f" | variant shown: {c['variant_title']}" if c.get("variant_title") else "")
                      + (f" | options: {opts}" if opts else "") + f" | {price} | sold by {c['seller']}"
-                     + f" | fast matcher P(same)={c.get('same')}")
+                     + (f" | fast matcher P(fits)={c.get('fit')}" if prompt else f" | fast matcher P(same)={c.get('same')}"))
     thumbs = list(thumb_pool.map(lambda c: _thumb(c.get("image")), cands))
     items = [{"type": "text", "text": "PHOTO of the item the shopper wants:"},
              {"type": "image", "data": crop_b64, "mime_type": "image/jpeg"}]
     for i, th in enumerate(thumbs):
         if th:
             items += [{"type": "text", "text": f"Store photo of listing {i}:"}, {"type": "image", "data": th, "mime_type": "image/jpeg"}]
-    items.append({"type": "text", "text": REVIEW_PROMPT.format(label=_label(product), query=product.get("query", ""), listings="\n".join(lines))})
+    items.append({"type": "text", "text": prompt.format(listings="\n".join(lines)) if prompt else
+                  REVIEW_PROMPT.format(label=_label(product), query=product.get("query", ""), listings="\n".join(lines))})
     it = _wait(beta.interactions.create(
         model=NEON, input=items,
         response_format={"type": "text", "mime_type": "application/json", "schema": REVIEW_SCHEMA},
@@ -483,6 +491,435 @@ def checkout(body: CheckoutIn):
         raise HTTPException(502, str(e)[:300])
 
 
+# ---------------------------------------------------------------------------------------------------------------
+# Image store: the page and the Chrome extension both hand over an image once and refer to it by id afterwards.
+
+UPLOADS, RENDERS = ROOT / "data" / "uploads", ROOT / "data" / "renders"
+KEEP_FILES = 120   # per folder; the oldest are deleted (disk is small)
+
+
+def _prune(folder):
+    files = sorted(folder.glob("*.*"), key=lambda p: p.stat().st_mtime)
+    for p in files[:-KEEP_FILES]:
+        p.unlink(missing_ok=True)
+
+
+def store_image(data):
+    """Normalise to an RGB JPEG of at most 1280 px (what the models are tested with) and store it by content hash."""
+    try:
+        im = Image.open(io.BytesIO(data))
+        im.load()
+    except Exception:
+        raise HTTPException(400, "that is not an image this server can read")
+    im = im.convert("RGB")
+    im.thumbnail((1280, 1280))
+    buf = io.BytesIO()
+    im.save(buf, "JPEG", quality=88)
+    b = buf.getvalue()
+    iid = hashlib.sha1(b).hexdigest()[:16]
+    UPLOADS.mkdir(parents=True, exist_ok=True)
+    path = UPLOADS / (iid + ".jpg")
+    if not path.exists():
+        path.write_bytes(b)
+        _prune(UPLOADS)
+    return {"id": iid, "width": im.size[0], "height": im.size[1]}
+
+
+def load_image(iid):
+    if not re.fullmatch(r"[0-9a-f]{16}", iid or ""):
+        raise HTTPException(400, "bad image id")
+    path = UPLOADS / (iid + ".jpg")
+    if not path.exists():
+        raise HTTPException(404, "that image is no longer stored: give the page the image again")
+    return path.read_bytes()
+
+
+@app.middleware("http")
+async def local_only(request: Request, call_next):
+    """Only this page and browser extensions may POST: a random website open in the browser must not start scans."""
+    origin = request.headers.get("origin")
+    if request.method == "POST" and origin and not re.match(r"^(https?://(localhost|127\.0\.0\.1)(:\d+)?|chrome-extension://[a-p]{32})$", origin):
+        return JSONResponse({"detail": "cross-site requests are not accepted"}, status_code=403)
+    return await call_next(request)
+
+
+@app.get("/api/health")
+def health():
+    return {"ok": True, "app": "shelfcart", "models": {"see": HYDROGEN, "match": DECISION, "second_look": NEON, "redraw": remix.IMAGE}}
+
+
+@app.post("/api/image")
+async def image_in(request: Request):
+    """Body: the raw image bytes (any Content-Type), or JSON {"data_url": "data:image/...;base64,..."}.
+    The extension's service worker posts bytes here; the page posts what was pasted or dropped."""
+    data = await request.body()
+    if len(data) > 30_000_000:
+        raise HTTPException(413, "image larger than 30 MB")
+    if request.headers.get("content-type", "").startswith("application/json"):
+        try:
+            data = base64.b64decode(json.loads(data)["data_url"].split(",", 1)[1])
+        except Exception:
+            raise HTTPException(400, "expected {data_url}")
+    if not data:
+        raise HTTPException(400, "empty body")
+    return store_image(data)
+
+
+@app.get("/api/image/{iid}")
+def image_out(iid: str):
+    return Response(load_image(iid), media_type="image/jpeg", headers={"Cache-Control": "private, max-age=86400"})
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Progressive scan: one streamed response, one JSON object per line, so the page can paint each stage as it lands:
+#   items (Hydrogen)  ->  match per item (Shopify search + Decision 1)  ->  review per item (Neon)  ->  done
+
+class StreamIn(BaseModel):
+    image_ids: list[str] = []
+    frames: list[str] = []   # data URLs, accepted for older callers
+
+
+def _slim(p):
+    return {**p, "label": _label(p)}
+
+
+@app.post("/api/scan/stream")
+def scan_stream(body: StreamIn):
+    if body.image_ids:
+        frames = [(base64.b64encode(load_image(i)).decode(), "image/jpeg") for i in body.image_ids[:5]]
+    elif body.frames:
+        frames = [_split(f) for f in body.frames[:5]]
+    else:
+        raise HTTPException(400, "no image")
+
+    def gen():
+        line = lambda o: (json.dumps(o) + "\n").encode()
+        t0 = time.time()
+        try:
+            imgs = [Image.open(io.BytesIO(base64.b64decode(b))).convert("RGB") for b, _ in frames]
+            products = detect(frames)
+        except Exception as e:
+            yield line({"type": "error", "stage": "items", "message": (type(e).__name__ + ": " + str(e))[:300]})
+            return
+        t_detect = time.time() - t0
+        frame_of = lambda p: min(max(int(p.get("frame", 0) or 0), 0), len(imgs) - 1)
+        for p in products:
+            p["frame"] = frame_of(p)
+        yield line({"type": "items", "ms": round(t_detect * 1000), "products": [
+            {**_slim(p), "crop": "data:image/jpeg;base64," + _crop(imgs[p["frame"]], p.get("box_2d") or [])} for p in products]})
+        t1 = time.time()
+        results = [None] * len(products)
+        futs = {pool.submit(match, p, imgs[p["frame"]], "defer"): i for i, p in enumerate(products)}
+        for f in as_completed(futs):
+            i = futs[f]
+            try:
+                results[i] = f.result()
+            except Exception as e:
+                results[i] = {**_slim(products[i]), "candidates": [], "pick": None, "status": "none", "pending": False,
+                              "error": str(e)[:200], "kind": None, "decided_by": None, "reason": "", "neon": None}
+            yield line({"type": "match", "i": i, "ms": round((time.time() - t0) * 1000), "product": results[i]})
+        before = [r["pick"] for r in results]
+        consolidate([r for r in results if r.get("candidates")])
+        for i, r in enumerate(results):
+            if r["pick"] != before[i]:
+                yield line({"type": "match", "i": i, "ms": round((time.time() - t0) * 1000), "product": r})
+        t_match = time.time() - t1
+        pend = {pool.submit(second_look, r): i for i, r in enumerate(results) if r.get("pending")}
+        yield line({"type": "matched", "ms": round((time.time() - t0) * 1000), "reviews": len(pend)})
+        for f in as_completed(pend):
+            i = pend[f]
+            try:
+                results[i] = f.result()
+            except Exception:
+                results[i]["pending"] = False
+            yield line({"type": "review", "i": i, "ms": round((time.time() - t0) * 1000), "product": results[i]})
+        yield line({"type": "done", "timing": {"detect_ms": round(t_detect * 1000), "match_ms": round(t_match * 1000),
+                                               "total_ms": round((time.time() - t0) * 1000), "neon_reviews": len(pend)}})
+
+    return StreamingResponse(gen(), media_type="application/x-ndjson", headers={"X-Accel-Buffering": "no", "Cache-Control": "no-store"})
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Remix: change one item, then (a) real products for the new version and (b) the picture redrawn. Both start at once.
+
+_suggest_cache, _render_lock, _render_jobs = {}, threading.Lock(), {}
+render_pool = ThreadPoolExecutor(max_workers=4)
+RENDER_TIMEOUT = 90
+
+
+class SuggestIn(BaseModel):
+    image_id: str
+    label: str
+
+
+@app.post("/api/remix/suggest")
+def remix_suggest(body: SuggestIn):
+    """Hydrogen proposes 4 variations of this item that suit the scene. About 6 s; cached per image and item."""
+    key = (body.image_id, body.label)
+    if key not in _suggest_cache:
+        t0 = time.time()
+        try:
+            v = remix.suggest(load_image(body.image_id), body.label[:120])
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(502, "Hydrogen could not suggest variations: " + str(e)[:200])
+        _suggest_cache[key] = {"variations": v, "ms": round((time.time() - t0) * 1000), "model": HYDROGEN}
+    return _suggest_cache[key]
+
+
+_WISH_LEAD = re.compile(r"^\s*(please\s+)?(can you\s+)?(make|turn|change|show|give|i want|i'd like|i would like)?\s*(me\s+)?(it|this|that|the \w+)?\s*"
+                        r"(to be|into|to|in|with|as|but)?\s*(an?\s+)?", re.I)
+
+
+def wish_variation(product, wish):
+    """A variation the shopper typed ("make it corduroy"). No model call, so the search can start at once:
+    the query is the wish without its lead-in words plus the kind of item."""
+    wish = " ".join(wish.split())[:120]
+    core = _WISH_LEAD.sub("", wish, count=1).strip(" .!") or wish
+    name = (product.get("name") or product.get("label") or "").strip()
+    return {"label": core[:28], "kind": "style", "edit": wish, "query": f"{core} {name}".strip()[:80], "typed": True}
+
+
+REMIX_REVIEW = """The first image is a crop from a picture showing one item: {label}.
+The shopper does NOT want it as it is. They want this change: {edit}
+(short name of the wanted version: {vlabel}). Search query used: {query}.
+Imagine the item with that change applied, then judge the store listings against that imagined version.
+Where a store photo of a listing is attached, look at it; otherwise go by the title and options.
+
+Listings:
+{{listings}}
+
+Pick the listing that is closest to the WANTED version: same type of thing, with the requested change, and otherwise
+as near as possible to the original's shape and style. Because the wanted version is imagined, an answer is never
+"exact": use kind = similar for the closest listing, or choice = -1 and kind = none if no listing is that type of
+item or none has the requested change. Set confident = false and pack = unknown.
+reason: a few plain words (max 14) on how the listing compares with the wanted version, naming the most visible
+difference, e.g. 'right colour, squarer arms' or 'corduroy as asked, lighter shade'."""
+
+
+def remix_decide(crop_b64, product, var, cands):
+    """Decision 1, about 1 s: how well does each listing fit the item WITH the change? Ranks the cards right away."""
+    criteria, questions = {}, {}
+    want = f"{var['label']}: {var['edit']}"
+    for i, c in enumerate(cands):
+        opts = "; ".join(f"{k}: {', '.join(v)}" for k, v in c["options"].items())
+        desc = f"{c['title']}" + (f" (options: {opts})" if opts else "") + f". Sold by {c['seller']}."
+        criteria[f"c{i}"] = desc
+        questions[f"fit{i}"] = {"type": "noul", "instructions":
+            f"Is this store listing the same type of item as the one in the photo AND does it have the change the shopper "
+            f"asked for ({want})? Listing: {desc}"}
+    criteria["none"] = "None of the listings is that type of item with the requested change."
+    questions["pick"] = {"type": "choice", "criteria": criteria, "instructions":
+        f"Which store listing is closest to the item in the photo after this change: {want}?"}
+    d = beta.decisions.create(model=DECISION, questions=questions, input=[
+        {"type": "image", "data": crop_b64, "mime_type": "image/jpeg"},
+        {"type": "text", "text": f"The photo shows: {_label(product)}. The shopper wants it changed: {want}."}])
+    a = d.answers
+    fit = [round(float(a[f"fit{i}"].noul), 3) for i in range(len(cands))]
+    probs = {k: round(float(v), 3) for k, v in (a["pick"].probabilities or {}).items()}
+    return fit, probs
+
+
+class RemixIn(BaseModel):
+    product: dict            # the found item as the page has it (label, name, crop ...)
+    variation: dict = {}     # {label, kind, edit, query}; or
+    wish: str = ""           # free text typed by the shopper
+    candidates: list[dict] = []   # for /api/remix/review: the listings /api/remix/match returned
+
+
+def _variation(body):
+    v = wish_variation(body.product, body.wish) if body.wish.strip() else dict(body.variation)
+    if not v.get("query") or not v.get("edit"):
+        raise HTTPException(400, "a variation needs an edit and a query, or send a wish")
+    return v
+
+
+def _crop_b64(product):
+    crop = str(product.get("crop", ""))
+    if not crop.startswith("data:image/"):
+        raise HTTPException(400, "the product needs its crop")
+    return crop.split(",", 1)[1]
+
+
+@app.post("/api/remix/match")
+def remix_match(body: RemixIn):
+    """Real products for the changed item: Shopify search with the variation's query, ranked by Decision 1.
+    Returns in 1 to 3 s with pending = true; the page then asks /api/remix/review for Neon's pick."""
+    var, crop, t0 = _variation(body), _crop_b64(body.product), time.time()
+    out = {"variation": var, "candidates": [], "pick": None, "status": "none", "reason": "", "decided_by": None,
+           "pending": False, "error": None, "timing": {}}
+    try:
+        cands = shopify.search(var["query"])
+        if not cands and body.product.get("name"):
+            cands = shopify.search(f"{var['label']} {body.product['name']}")
+    except Exception as e:
+        cands, out["error"] = [], str(e)[:200]
+    out["candidates"], out["timing"]["search_ms"] = cands, round((time.time() - t0) * 1000)
+    if cands:
+        t1 = time.time()
+        try:
+            fit, probs = remix_decide(crop, body.product, var, cands)
+            for i, c in enumerate(cands):
+                c["fit"], c["p"] = fit[i], probs.get(f"c{i}")
+            best = max(range(len(cands)), key=lambda i: fit[i] + (probs.get(f"c{i}") or 0))
+            if fit[best] >= 0.5:
+                out.update(pick=best, status="similar")
+            out["decided_by"] = DECISION
+        except Exception as e:
+            out["error"] = "decision: " + str(e)[:200]
+        out["timing"]["decide_ms"] = round((time.time() - t1) * 1000)
+        out["pending"] = True
+    return out
+
+
+@app.post("/api/remix/review")
+def remix_review(body: RemixIn):
+    """Neon's careful look at the listings for the changed item: the closest one and how it differs, or nothing close."""
+    var, crop, cands, t0 = _variation(body), _crop_b64(body.product), body.candidates, time.time()
+    if not cands:
+        raise HTTPException(400, "no candidates")
+    prompt = REMIX_REVIEW.format(label=_label(body.product), edit=var["edit"], vlabel=var["label"], query=var["query"])
+    try:
+        r = _hedged(lambda: review(crop, body.product, cands, prompt=prompt))
+    except Exception as e:
+        return {"error": (type(e).__name__ + " " + str(e))[:200], "ms": round((time.time() - t0) * 1000)}
+    return {"pick": r["choice"], "status": "none" if r["choice"] is None else "similar", "reason": r["reason"],
+            "decided_by": NEON, "ms": round((time.time() - t0) * 1000)}
+
+
+class RenderIn(BaseModel):
+    image_id: str
+    label: str        # the item, e.g. "Sofa green velvet"
+    edit: str         # how it should look
+    ref_url: str = ""  # optional: the merchant's photo of a real option, so the redraw follows the real product
+    box_2d: list[int] = []   # the item's box, to check that the rest of the picture was kept
+
+
+def scene_kept(orig, new, box):
+    """Did the redraw keep the picture and change only the item? The image model now and then returns a recomposed
+    scene (other framing, the app chrome gone). Checks the aspect ratio, then the mean grey-level difference outside
+    the item's box on a 96 px copy: kept scenes measure 2 to 6, a recomposed one about 100."""
+    if abs(new.size[0] / new.size[1] - orig.size[0] / orig.size[1]) > 0.05 * orig.size[0] / orig.size[1]:
+        return False
+    w, h = 96, max(8, round(96 * orig.size[1] / orig.size[0]))
+    d = ImageChops.difference(orig.convert("L").resize((w, h)), new.convert("L").resize((w, h))).load()
+    try:
+        y0, x0, y1, x1 = [max(0, min(1000, int(v))) / 1000 for v in box[:4]]
+    except Exception:
+        y0 = x0 = y1 = x1 = 0
+    if (y1 - y0) * (x1 - x0) > 0.7:   # the item fills the picture: nothing outside it to compare
+        return True
+    tot = n = 0
+    for y in range(h):
+        for x in range(w):
+            if not (x0 - .06 <= x / w <= x1 + .06 and y0 - .06 <= y / h <= y1 + .06):
+                tot, n = tot + d[x, y], n + 1
+    return n == 0 or tot / n < 22
+
+
+def _do_render(path, body):
+    ref = None
+    if body.ref_url.startswith("https://cdn.shopify.com/"):
+        t = _thumb(body.ref_url)
+        ref = base64.b64decode(t) if t else None
+    src = load_image(body.image_id)
+    orig = Image.open(io.BytesIO(src)).convert("RGB")
+    for attempt in range(2):   # one retry when the model redrew the whole scene
+        data, mime = remix.render(src, body.label[:120], body.edit[:300], ref=ref)
+        im = Image.open(io.BytesIO(data)).convert("RGB")   # re-encode: known format, bounded size
+        if scene_kept(orig, im, body.box_2d):
+            break
+    else:
+        raise RuntimeError("the image model changed more than the item, twice, so no preview is shown")
+    im.thumbnail((1600, 1600))
+    RENDERS.mkdir(parents=True, exist_ok=True)
+    im.save(path, "JPEG", quality=88)
+    _prune(RENDERS)
+    return im.size
+
+
+@app.post("/api/remix/render")
+def remix_render(body: RenderIn):
+    """The picture redrawn with only that item changed (Gemini image model, about 15 s). Cached per image + item + edit.
+    The result is a generated preview and the page labels it as one."""
+    load_image(body.image_id)   # 404 early
+    key = hashlib.sha1("|".join((body.image_id, body.label, body.edit, body.ref_url)).encode()).hexdigest()[:16]
+    path, t0 = RENDERS / (key + ".jpg"), time.time()
+    cached = path.exists()
+    if not cached:
+        with _render_lock:   # two requests for the same redraw share one model call
+            fut = _render_jobs.get(key)
+            if fut is None:
+                fut = _render_jobs[key] = render_pool.submit(_do_render, path, body)
+        try:
+            fut.result(timeout=RENDER_TIMEOUT)
+        except Exception as e:
+            raise HTTPException(504 if isinstance(e, TimeoutError) else 502,
+                                "the preview could not be drawn: " + (type(e).__name__ + " " + str(e))[:200])
+        finally:
+            if fut.done():
+                with _render_lock:
+                    _render_jobs.pop(key, None)
+    return {"url": f"/api/render/{key}", "cached": cached, "ms": round((time.time() - t0) * 1000), "model": remix.IMAGE}
+
+
+@app.get("/api/render/{key}")
+def render_out(key: str):
+    if not re.fullmatch(r"[0-9a-f]{16}", key) or not (RENDERS / (key + ".jpg")).exists():
+        raise HTTPException(404, "no such preview")
+    return FileResponse(RENDERS / (key + ".jpg"), media_type="image/jpeg", headers={"Cache-Control": "private, max-age=86400"})
+
+
+class ProductIn(BaseModel):
+    product_id: str
+    selected: dict[str, str] = {}
+
+
+@app.post("/api/product")
+def product_options(body: ProductIn):
+    """A listing's REAL options from the merchant (colour, size ...), each with availability and a swatch photo where
+    the catalog has one, and the exact variant (price, stock, photo) for a selection. About 0.2 s."""
+    try:
+        return shopify.product(body.product_id, body.selected or None)
+    except Exception as e:
+        raise HTTPException(502, str(e)[:300])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Optional Sign in with Shop (device flow, Shop's public client: no key). See app/shopauth.py.
+
+@app.get("/api/shop/status")
+def shop_status():
+    return shopauth.status()
+
+
+@app.post("/api/shop/signin")
+def shop_signin():
+    try:
+        return shopauth.start()
+    except Exception as e:
+        raise HTTPException(502, "Shop sign-in is not available right now: " + type(e).__name__)
+
+
+@app.post("/api/shop/signout")
+def shop_signout():
+    return shopauth.signout()
+
+
+# ---------------------------------------------------------------------------------------------------------------
+
+WEB = ROOT / "web"
+app.mount("/static", StaticFiles(directory=WEB), name="static")
+_NO_CACHE = {"Cache-Control": "no-cache"}
+
+
 @app.get("/")
 def index():
-    return FileResponse(ROOT / "web" / "index.html")
+    return FileResponse(WEB / "index.html", headers=_NO_CACHE)
+
+
+@app.get("/panel")
+def panel():
+    """The same page, opened by the Chrome extension's side panel as /panel?scan=<image id>: it starts on that image."""
+    return FileResponse(WEB / "index.html", headers=_NO_CACHE)

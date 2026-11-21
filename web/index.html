@@ -5,346 +5,86 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ShelfCart</title>
 <link rel="icon" href="data:,">
-<style>
-  :root { --ink:#16181d; --mute:#667085; --line:#e4e7ec; --bg:#f6f5f1; --card:#fff; --go:#0a7d4f; --go-bg:#e6f5ee; --warn:#b25e09; --warn-bg:#fdf1e0; --no:#8a8f98; --no-bg:#eef0f2; --accent:#2b3bd6; }
-  * { box-sizing:border-box; }
-  body { margin:0; font:15px/1.45 -apple-system, "Segoe UI", Inter, sans-serif; color:var(--ink); background:var(--bg); }
-  main { max-width:1040px; margin:0 auto; padding:20px 16px 80px; }
-  h1 { font-size:26px; margin:0; letter-spacing:-.02em; }
-  h2 { font-size:17px; margin:28px 0 10px; }
-  .sub { color:var(--mute); margin:4px 0 18px; }
-  .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; }
-  .capture { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:14px; }
-  @media (max-width:720px){ .capture{ grid-template-columns:1fr; } }
-  video#cam { width:100%; aspect-ratio:16/10; background:#111; border-radius:10px; object-fit:cover; display:block; }
-  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-  button, .btn { font:inherit; font-weight:600; border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:10px; padding:9px 14px; cursor:pointer; text-decoration:none; display:inline-block; }
-  button.primary, .btn.primary { background:var(--ink); color:#fff; border-color:var(--ink); }
-  button.go { background:var(--go); color:#fff; border-color:var(--go); }
-  button:disabled { opacity:.45; cursor:not-allowed; }
-  .hint { color:var(--mute); font-size:13px; }
-  #frames { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
-  #frames img { height:64px; border-radius:6px; border:1px solid var(--line); }
-  #status { margin:14px 0 0; font-weight:600; min-height:22px; }
-  .bar { height:4px; background:var(--line); border-radius:4px; overflow:hidden; margin-top:8px; display:none; }
-  .bar i { display:block; height:100%; width:0; background:var(--accent); }
-  .item { display:grid; grid-template-columns:150px minmax(0,1fr); gap:14px; margin-bottom:12px; }
-  @media (max-width:720px){ .item{ grid-template-columns:96px minmax(0,1fr); } }
-  .item .crop { width:100%; aspect-ratio:1; object-fit:contain; background:#f1f1ee; border-radius:10px; }
-  .item h3 { margin:0 0 2px; font-size:16px; }
-  .badge { display:inline-block; font-size:12px; font-weight:700; border-radius:999px; padding:2px 9px; margin-right:6px; }
-  .badge.auto { background:var(--go-bg); color:var(--go); } .badge.confirm { background:var(--warn-bg); color:var(--warn); } .badge.none { background:var(--no-bg); color:var(--no); }
-  .badge.similar { background:#e9ebfc; color:var(--accent); }
-  .badge.model { background:#fff; color:var(--mute); border:1px solid var(--line); font-weight:600; }
-  .why { font-size:13.5px; margin:0 0 8px; }
-  .cand.suggest.similar { border-color:var(--accent); }
-  .cand .tag { position:absolute; top:6px; left:6px; font-size:11px; font-weight:700; border-radius:999px; padding:1px 7px; background:var(--accent); color:#fff; }
-  .cand .tag.exact { background:var(--go); }
-  #drop { border:2px dashed #b9bfcc; border-radius:12px; padding:34px 16px; text-align:center; cursor:pointer; background:#fbfbf9; transition:background .15s, border-color .15s; }
-  #drop.over, body.dragging #drop { border-color:var(--accent); background:#eef0fd; }
-  #drop .big { font-size:20px; font-weight:700; letter-spacing:-.01em; }
-  #drop kbd { font:inherit; font-size:13px; background:#fff; border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:1px 6px; }
-  details.camera { margin-top:12px; } details.camera summary { cursor:pointer; font-weight:600; color:var(--mute); }
-  details.camera video { max-width:520px; margin:10px 0; }
-  table.eval { border-collapse:collapse; width:100%; font-size:13.5px; margin:8px 0; }
-  table.eval th, table.eval td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:right; }
-  table.eval th:first-child, table.eval td:first-child { text-align:left; }
-  #evalBox ul { margin:6px 0 0; padding-left:18px; font-size:13.5px; } #evalBox li { margin-bottom:3px; }
-  .meta { color:var(--mute); font-size:12.5px; margin:4px 0 8px; }
-  .cands { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }
-  .cand { flex:0 0 150px; width:150px; min-width:0; overflow:hidden; border:2px solid var(--line); border-radius:10px; padding:8px; cursor:pointer; background:#fff; font-size:12.5px; position:relative; }
-  .cand.sel { border-color:var(--go); background:var(--go-bg); }
-  .cand.suggest { border-color:var(--warn); border-style:dashed; }
-  .cand img { width:100%; aspect-ratio:1; object-fit:contain; background:#fff; border-radius:6px; }
-  .cand .t { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:36px; margin-top:4px; }
-  .cand .p { font-weight:700; font-size:14px; }
-  .cand .s { color:var(--mute); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .cand a { color:var(--accent); font-size:12px; }
-  .sticky { position:sticky; bottom:0; background:linear-gradient(transparent, var(--bg) 30%); padding:18px 0 10px; display:none; }
-  .cart { margin-bottom:12px; }
-  .cart h3 { margin:0 0 8px; font-size:16px; }
-  .line { display:flex; gap:10px; align-items:center; padding:6px 0; border-top:1px solid var(--line); }
-  .line img { width:44px; height:44px; object-fit:contain; border-radius:6px; background:#fff; }
-  .line .grow { flex:1; min-width:0; }
-  .tot { text-align:right; font-weight:700; margin:8px 0; }
-  .safe { background:var(--go-bg); color:var(--go); border-radius:10px; padding:10px 12px; font-size:13.5px; margin-bottom:12px; }
-  .err { color:#b42318; }
-  code { font-size:12px; background:#f1f1ee; padding:1px 5px; border-radius:4px; }
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-<main>
-  <h1>ShelfCart</h1>
-  <p class="sub">Shop any screenshot. Paste a post, a room, an outfit or a product page and get the items in it as real, buyable Shopify products.</p>
+<header class="mast">
+  <a class="wordmark" href="/" id="home">ShelfCart</a>
+  <p class="mast-note">Shop any image, change it, buy the real thing</p>
+  <button type="button" class="quiet" id="newBtn" hidden>New image</button>
+</header>
 
-  <div class="panel">
-    <div id="drop" tabindex="0" role="button" aria-label="Paste, drop or choose a screenshot">
-      <div class="big">Paste a screenshot, or drop one here</div>
-      <p class="hint" style="margin:8px 0 0"><kbd>Cmd</kbd> + <kbd>V</kbd> anywhere on this page (on a Mac, <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Cmd</kbd> + <kbd>4</kbd> copies a screenshot to the clipboard), drag an image in, or click to choose a file. It starts right away.</p>
-      <input id="file" type="file" accept="image/*,video/*" multiple hidden>
-    </div>
-    <div id="frames"></div>
-    <details class="camera">
-      <summary>Or use the camera (pan across a shelf, desk or bag)</summary>
-      <video id="cam" autoplay playsinline muted></video>
-      <div class="row">
-        <button id="btnCam">Start camera</button>
-        <button id="btnScan" class="primary" disabled>Scan for 4 seconds</button>
-        <span class="hint">Move slowly across the items. A video file is sampled into 5 frames in your browser; up to 5 photos.</span>
+<main id="app" data-state="empty">
+  <section class="stage" aria-label="Your image">
+    <div id="empty">
+      <div id="drop" tabindex="0" role="button" aria-label="Paste, drop or choose an image">
+        <h1>Shop any image.</h1>
+        <p class="lede">Paste a screenshot, drop a picture here, or choose a file. ShelfCart finds what is in it and shows real products you can buy from Shopify stores.</p>
+        <p class="keys"><kbd>Cmd</kbd> <kbd>V</kbd> to paste. On a Mac, <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Cmd</kbd> <kbd>4</kbd> copies a screenshot.</p>
+        <span class="btn solid" aria-hidden="true">Choose an image</span>
+        <input id="file" type="file" accept="image/*,video/*" multiple hidden>
       </div>
-    </details>
-  </div>
-  <div id="status"></div>
-  <div class="bar" id="bar"><i></i></div>
-
-  <div id="results"></div>
-  <div class="sticky" id="sticky">
-    <div class="panel row" style="justify-content:space-between">
-      <div><b id="selCount">0 items</b> <span class="hint" id="selSum"></span></div>
-      <button class="go" id="btnCart">Build Shopify cart</button>
+      <p id="emptyMsg" class="err" role="alert"></p>
+      <p class="aside">With the Chrome extension, right-click any image on any site and pick "Shop this image".</p>
+      <details class="camera">
+        <summary>Use the camera instead</summary>
+        <video id="cam" autoplay playsinline muted></video>
+        <div class="row">
+          <button type="button" id="btnCam">Start camera</button>
+          <button type="button" class="solid" id="btnScan" disabled>Scan for 4 seconds</button>
+        </div>
+        <p class="hint">Pan slowly across a shelf, a desk or a bag. A video file is sampled into 5 frames in your browser.</p>
+      </details>
     </div>
-  </div>
-  <div id="carts"></div>
 
-  <h2>Does it work</h2>
-  <div class="panel" id="evalBox"><span class="hint">Loading the latest evaluation run...</span></div>
+    <figure id="hero" hidden>
+      <div class="sheet" id="sheet">
+        <img id="heroImg" alt="The image you are shopping">
+        <img id="heroAlt" alt="" hidden>
+        <div id="boxmark" hidden></div>
+        <div id="markers"></div>
+        <div class="reading" id="reading" hidden><i></i></div>
+        <span class="genmark" id="genmark" hidden>Generated preview</span>
+      </div>
+      <figcaption id="heroCap"></figcaption>
+      <div id="frames" hidden></div>
+    </figure>
+  </section>
+
+  <section class="index" aria-label="What is in the image">
+    <p id="status" role="status" aria-live="polite"></p>
+    <ol id="items"></ol>
+    <div id="carts"></div>
+    <footer class="colophon" id="colophon" hidden>
+      <details>
+        <summary>Who does what</summary>
+        <dl class="who">
+          <dt>Gemini 4 Hydrogen</dt><dd>finds the items in the image and suggests ways to change them.</dd>
+          <dt>Shopify Catalog</dt><dd>is searched across all merchants for each item. Prices, stock and discounts are live.</dd>
+          <dt>Decision 1</dt><dd>decides in about a second which listings are an exact match.</dd>
+          <dt>Gemini 4 Neon</dt><dd>takes a careful second look and picks the closest similar item, saying how it differs.</dd>
+          <dt>Gemini image model</dt><dd>redraws the picture with one item changed. Those are generated previews, not product photos.</dd>
+          <dt>You</dt><dd>choose every listing, press the button that builds a cart, and pay on Shopify's own checkout page. ShelfCart never pays.</dd>
+        </dl>
+      </details>
+      <details id="evalBox">
+        <summary>How well it works, measured</summary>
+        <div id="evalBody"><p class="hint">Loading the latest test run.</p></div>
+      </details>
+    </footer>
+  </section>
 </main>
 
-<script>
-const $ = s => document.querySelector(s);
-const cam = $('#cam'), statusEl = $('#status'), bar = $('#bar'), barI = $('#bar i');
-let products = [], stream = null, busy = false;
-const money = (cents, cur='USD') => cents == null ? '' : new Intl.NumberFormat('en-US', {style:'currency', currency:cur}).format(cents / 100);
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+<div id="cartbar" hidden>
+  <div class="cartbar-in">
+    <p class="sum"><strong id="selCount"></strong><span id="selSum"></span></p>
+    <button type="button" class="solid" id="btnCart" disabled>Build cart</button>
+  </div>
+</div>
 
-function setStatus(t, isErr) { statusEl.textContent = t; statusEl.className = isErr ? 'err' : ''; }
-function progress(on) { bar.style.display = on ? 'block' : 'none'; if (on) { barI.style.transition='none'; barI.style.width='0'; requestAnimationFrame(() => { barI.style.transition='width 14s cubic-bezier(.1,.6,.3,1)'; barI.style.width='92%'; }); } }
-
-// ---------- capture ----------
-function grab(source, w, h) {
-  const scale = Math.min(1, 1280 / Math.max(w, h));
-  const c = document.createElement('canvas'); c.width = Math.round(w * scale); c.height = Math.round(h * scale);
-  c.getContext('2d').drawImage(source, 0, 0, c.width, c.height);
-  return c;
-}
-function sharpness(canvas) { // mean absolute horizontal gradient on a small gray copy: higher = less motion blur
-  const s = document.createElement('canvas'); s.width = 160; s.height = Math.round(160 * canvas.height / canvas.width);
-  const g = s.getContext('2d'); g.drawImage(canvas, 0, 0, s.width, s.height);
-  const d = g.getImageData(0, 0, s.width, s.height).data; let sum = 0;
-  for (let i = 4; i < d.length; i += 4) sum += Math.abs((d[i] + d[i+1] + d[i+2]) - (d[i-4] + d[i-3] + d[i-2]));
-  return sum / (d.length / 4);
-}
-function pickFrames(shots, n) { // shots: [{canvas, score}] in time order; keep the sharpest from each of n time buckets
-  if (shots.length <= n) return shots.map(s => s.canvas);
-  const out = [];
-  for (let b = 0; b < n; b++) {
-    const part = shots.slice(Math.floor(b * shots.length / n), Math.floor((b + 1) * shots.length / n));
-    out.push(part.reduce((a, x) => x.score > a.score ? x : a).canvas);
-  }
-  return out;
-}
-const toUrl = c => c.toDataURL('image/jpeg', 0.85);
-
-$('#btnCam').onclick = async () => {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
-    cam.srcObject = stream; $('#btnScan').disabled = false; setStatus('Camera on. Point it at the items and press Scan.');
-  } catch (e) { setStatus('Camera not available (' + e.message + '). Upload a video or photos instead.', true); }
-};
-
-$('#btnScan').onclick = async () => {
-  $('#btnScan').disabled = true;
-  const shots = [], t0 = performance.now(), DUR = 4000;
-  while (performance.now() - t0 < DUR) {
-    const c = grab(cam, cam.videoWidth, cam.videoHeight); shots.push({ canvas: c, score: sharpness(c) });
-    setStatus('Scanning... ' + Math.ceil((DUR - (performance.now() - t0)) / 1000) + 's. Keep moving slowly.');
-    await new Promise(r => setTimeout(r, 250));
-  }
-  $('#btnScan').disabled = false;
-  run(pickFrames(shots, 5).map(toUrl));
-};
-
-function loadImage(file) {
-  return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(grab(im, im.naturalWidth, im.naturalHeight)); im.onerror = rej; im.src = URL.createObjectURL(file); });
-}
-async function sampleVideo(file, n = 5) {
-  const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(file);
-  await new Promise((res, rej) => { v.onloadeddata = res; v.onerror = () => rej(new Error('cannot decode this video')); });
-  let dur = v.duration;
-  if (!isFinite(dur)) { // MediaRecorder webm has no duration until you seek past the end
-    v.currentTime = 1e7; await new Promise(r => v.onseeked = r); dur = v.currentTime;
-  }
-  const shots = [], steps = Math.min(15, Math.max(n, Math.floor(dur * 3)));
-  for (let i = 0; i < steps; i++) {
-    v.currentTime = dur * (i + 0.5) / steps;
-    await new Promise(r => v.onseeked = r);
-    const c = grab(v, v.videoWidth, v.videoHeight); shots.push({ canvas: c, score: sharpness(c) });
-  }
-  return pickFrames(shots, n);
-}
-async function intake(files, how) {
-  files = files.filter(f => f && (f.type.startsWith('image/') || f.type.startsWith('video/')));
-  if (!files.length) { setStatus('That was not an image. Copy a screenshot (or an image) and paste again, or drop an image file.', true); return; }
-  if (busy) { setStatus('Still working on the last image, one moment...'); return; }
-  try {
-    setStatus('Reading media...');
-    const vid = files.find(f => f.type.startsWith('video/'));
-    const canvases = vid ? await sampleVideo(vid) : await Promise.all(files.filter(f => f.type.startsWith('image/')).slice(0, 5).map(loadImage));
-    run(canvases.map(toUrl));
-  } catch (err) { setStatus('Could not read that ' + (how || 'file') + ': ' + (err && err.message || 'unsupported image'), true); }
-}
-const drop = $('#drop');
-$('#file').onchange = e => { const f = [...e.target.files]; e.target.value = ''; if (f.length) intake(f, 'file'); };
-drop.onclick = () => $('#file').click();
-drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#file').click(); } };
-document.addEventListener('paste', e => {
-  const items = [...(e.clipboardData?.items || [])].filter(i => i.kind === 'file').map(i => i.getAsFile()).filter(Boolean);
-  const files = items.length ? items : [...(e.clipboardData?.files || [])];
-  if (!files.length) { setStatus('The clipboard has no image. Copy a screenshot first, then paste.', true); return; }
-  e.preventDefault(); intake(files, 'pasted image');
-});
-let dragDepth = 0;
-const hasFiles = e => [...(e.dataTransfer?.types || [])].includes('Files');
-window.addEventListener('dragenter', e => { if (hasFiles(e)) { e.preventDefault(); dragDepth++; document.body.classList.add('dragging'); } });
-window.addEventListener('dragover', e => { if (hasFiles(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
-window.addEventListener('dragleave', e => { if (hasFiles(e) && --dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dragging'); } });
-window.addEventListener('drop', e => { // anywhere on the page counts, so a near miss does not navigate away
-  if (!hasFiles(e)) return;
-  e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
-  intake([...e.dataTransfer.files], 'dropped file');
-});
-
-// ---------- pipeline ----------
-async function run(frames) {
-  $('#frames').innerHTML = frames.map(f => `<img src="${f}">`).join('');
-  $('#results').innerHTML = ''; $('#carts').innerHTML = ''; $('#sticky').style.display = 'none';
-  setStatus(`Gemini 4 Hydrogen is finding the items in ${frames.length > 1 ? frames.length + ' frames' : 'your image'}, then Shopify search, Decision 1 for exact matches and Gemini 4 Neon for similar ones...`); progress(true);
-  busy = true;
-  try {
-    const r = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ frames, defer: true }) });
-    if (!r.ok) throw new Error('server said ' + r.status);
-    const j = await r.json();
-    products = j.products.map(p => ({ ...p, sel: p.status === 'auto' ? p.pick : null }));
-    const t = j.timing;
-    const n = k => products.filter(p => !p.pending && p.status === k).length;
-    const summary = () => `Found ${products.length} items: ${n('auto')} exact (pre-selected), ${n('similar')} similar, ${n('confirm')} to confirm, ${n('none')} with nothing close.`;
-    const head = `Hydrogen ${(t.detect_ms / 1000).toFixed(1)}s, search + Decision 1 ${(t.match_ms / 1000).toFixed(1)}s`;
-    const pending = products.filter(p => p.pending);
-    setStatus(products.length ? (pending.length ? `Found ${products.length} items in ${(t.total_ms / 1000).toFixed(1)}s. Gemini 4 Neon is taking a second look at ${pending.length} without an exact match...` : `${summary()} ${head}.`) : 'No purchasable items found in that image. Try a screenshot where the items are larger.');
-    render();
-    progress(false);
-    if (pending.length) {
-      const t1 = performance.now(), mine = products;
-      const groups = Array.from({ length: Math.min(5, pending.length) }, (_, g) => pending.filter((_, i) => i % 5 === g)); // browsers allow 6 connections per host
-      await Promise.all(groups.map(async group => {
-        let done = group.map(p => ({ ...p, pending: false }));   // if the request fails the items keep Decision 1's verdict
-        try {
-          const rr = await fetch('/api/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ products: group.map(({ sel, ...rest }) => rest) }) });
-          if (!rr.ok) throw new Error('review ' + rr.status);
-          done = (await rr.json()).products;
-        } catch (err) { /* keep the fallback */ }
-        if (products !== mine) return;            // a newer scan replaced this one
-        group.forEach((p, n) => {
-          const i = products.indexOf(p); if (i < 0) return;
-          const q = done[n] || { ...p, pending: false }, userSel = products[i].sel;   // keep anything the person already tapped
-          products[i] = { ...q, sel: userSel != null ? userSel : (q.status === 'auto' ? q.pick : null) };
-        });
-        render();
-      }));
-      if (products === mine) setStatus(`${summary()} ${head}, Neon ${((performance.now() - t1) / 1000).toFixed(1)}s for ${pending.length} second looks.`);
-    }
-  } catch (e) { setStatus('Scan failed: ' + e.message, true); }
-  busy = false;
-  progress(false);
-}
-
-const BADGE = { auto: ['auto', 'Exact'], confirm: ['confirm', 'Exact? Needs your OK'], similar: ['similar', 'Similar'], none: ['none', 'Nothing close'] };
-const MODEL = { 'gemini-decision-1': 'Decision 1', 'gemini-4-neon': 'Gemini 4 Neon' };
-function render() {
-  $('#results').innerHTML = products.length ? '<h2>What it found</h2>' + products.map((p, i) => {
-    const [cls, txt] = p.pending ? ['model', 'Neon is taking a second look...'] : (BADGE[p.status] || BADGE.none);
-    const neon = p.decided_by === 'gemini-4-neon';
-    const why = p.pending ? 'Decision 1 found no confident exact match. Gemini 4 Neon is looking for the closest similar item.' : p.status === 'auto' ? (neon ? 'Neon confirmed this listing: ' + esc(p.reason) : (p.consolidated ? 'Switched to a merchant already in your cart (equally good match).' : 'Decision 1 is confident this is the same product.')) :
-                p.status === 'similar' ? '<b>Closest similar item:</b> ' + esc(p.reason) + ' Tap it to add it.' :
-                p.status === 'confirm' ? (neon ? 'Neon thinks this is the product but is not sure: ' + esc(p.reason) : 'Decision 1 is not sure this is the same product.') + ' Tap a listing to add it.' :
-                (p.candidates.length ? (neon && p.reason ? 'Neon found nothing close: ' + esc(p.reason) : 'None of these looked close.') + ' Tap one if it is right.' : 'Nothing found in the Shopify catalog' + (p.error ? ' (' + esc(p.error) + ')' : '') + '.');
-    const order = p.candidates.map((c, k) => k).sort((x, y) => (y === p.pick) - (x === p.pick)); // the pick first
-    return `<div class="panel item">
-      <img class="crop" src="${p.crop}">
-      <div>
-        <h3>${esc(p.label)}</h3>
-        <div class="meta"><span class="badge ${cls}">${txt}</span>${p.decided_by ? `<span class="badge model" title="${esc(p.decided_by)}">decided by ${MODEL[p.decided_by] || esc(p.decided_by)}</span>` : ''}seen ${Math.round(p.confidence * 100)}%${p.legible != null ? ' · label readable ' + Math.round(p.legible * 100) + '%' : ''}</div>
-        <p class="why">${why}</p>
-        <div class="cands">${order.map(k => { const c = p.candidates[k]; return `
-          <div class="cand ${p.sel === k ? 'sel' : (p.pick === k && !p.pending ? 'suggest ' + (p.status === 'similar' ? 'similar' : '') : '')}" data-i="${i}" data-k="${k}">
-            ${p.pick === k && !p.pending ? `<span class="tag ${p.status === 'similar' ? '' : 'exact'}">${p.status === 'similar' ? 'Similar' : 'Exact'}</span>` : ''}
-            <img src="${esc(c.image)}${c.image.includes('?') ? '&' : '?'}width=300" referrerpolicy="no-referrer">
-            <div class="t">${esc(c.title)}</div>
-            <div class="p">${money(c.price, c.currency)}</div>
-            <div class="s">${esc(c.seller)}</div>
-            <div class="s">Decision 1: ${c.same != null ? Math.round(c.same * 100) + '% same' : '?'} · <a href="${esc(c.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">listing</a></div>
-          </div>`; }).join('')}</div>
-      </div></div>`;
-  }).join('') : '';
-  document.querySelectorAll('.cand').forEach(el => el.onclick = () => {
-    const p = products[+el.dataset.i], k = +el.dataset.k; p.sel = p.sel === k ? null : k; render();
-  });
-  const chosen = products.filter(p => p.sel != null).map(p => p.candidates[p.sel]);
-  $('#sticky').style.display = products.length ? 'block' : 'none';
-  $('#selCount').textContent = chosen.length + (chosen.length === 1 ? ' item' : ' items');
-  $('#selSum').textContent = chosen.length ? `${money(chosen.reduce((a, c) => a + c.price, 0))} before shipping and tax · ${new Set(chosen.map(c => c.shop)).size} merchant(s)` : 'Tap listings to select them';
-  $('#btnCart').disabled = !chosen.length;
-}
-
-$('#btnCart').onclick = async () => {
-  const chosen = products.filter(p => p.sel != null).map(p => p.candidates[p.sel]);
-  const titles = Object.fromEntries(chosen.map(c => [c.variant_id, c]));
-  $('#btnCart').disabled = true; setStatus('Creating carts on Shopify...');
-  try {
-    const r = await fetch('/api/cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lines: chosen.map(c => ({ shop: c.shop, variant_id: c.variant_id, quantity: 1 })) }) });
-    const j = await r.json();
-    setStatus(`Built ${j.carts.filter(c => !c.error).length} real Shopify cart(s) in ${(j.ms / 1000).toFixed(1)}s. Nothing has been bought.`);
-    $('#carts').innerHTML = '<h2>Your carts</h2><div class="safe">These are real carts on each merchant\'s Shopify store. ShelfCart never pays: you review and pay on the merchant\'s own page. Shopify needs one cart per merchant.</div>' +
-      j.carts.map((c, n) => c.error ? `<div class="panel cart"><h3>${esc(c.shop)}</h3><div class="err">Could not create this cart: ${esc(c.error)}</div></div>` : `
-      <div class="panel cart">
-        <h3>${esc((titles[c.lines[0]?.variant_id] || {}).seller || c.shop)} <span class="hint">${esc(c.shop)}</span></h3>
-        ${c.lines.map(l => `<div class="line"><img src="${esc(l.image || '')}"><div class="grow">${esc((titles[l.variant_id] || {}).title || l.title)}<div class="hint">${esc(l.title || '')} · qty ${l.quantity}</div></div><b>${money(l.price, c.currency)}</b></div>`).join('')}
-        ${c.discounts.length ? `<div class="hint">Discount applied by merchant: ${esc(c.discounts.join(', '))}</div>` : ''}
-        <div class="tot">${c.totals.filter(t => t.type === 'total').map(t => 'Estimated total ' + money(t.amount, c.currency)).join('')}</div>
-        <div class="row">
-          <a class="btn primary" href="${esc(c.continue_url)}" target="_blank" rel="noopener">Open cart at merchant</a>
-          <button data-n="${n}" class="co">Prepare checkout (tax + review page)</button>
-          <span class="hint" id="co${n}"></span>
-        </div>
-      </div>`).join('');
-    document.querySelectorAll('.co').forEach(b => b.onclick = async () => {
-      const c = j.carts[+b.dataset.n], out = $('#co' + b.dataset.n); b.disabled = true; out.textContent = 'Asking Shopify...';
-      try {
-        const r2 = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ shop: c.shop, cart_id: c.id }) });
-        if (!r2.ok) throw new Error((await r2.json()).detail || r2.status);
-        const k = await r2.json(), tot = k.totals.find(t => t.type === 'total'), tax = k.totals.find(t => t.type === 'tax');
-        out.innerHTML = `${tot ? 'Total ' + money(tot.amount, k.currency) : ''}${tax ? ' incl. ' + money(tax.amount, k.currency) + ' tax' : ''} · <a href="${esc(k.continue_url)}" target="_blank" rel="noopener"><b>Review and pay on Shop</b></a> (you enter address and payment there)`;
-      } catch (e) { out.textContent = 'Checkout not available: ' + e.message; b.disabled = false; }
-    });
-    $('#carts').scrollIntoView({ behavior: 'smooth' });
-  } catch (e) { setStatus('Cart failed: ' + e.message, true); }
-  $('#btnCart').disabled = false;
-};
-
-// ---------- "Does it work": latest tests/eval.py run ----------
-(async () => {
-  const box = $('#evalBox');
-  try {
-    const r = await fetch('/api/eval'); if (!r.ok) throw new Error('none');
-    const e = await r.json();
-    const cell = (v, t) => t ? `${v} / ${t}` : v;
-    box.innerHTML = `<div class="hint">${esc(e.summary || '')} "Pre-selected" means in the cart selection without the person tapping; the baseline pre-selects everything. Run on ${esc(e.date || '?')}; reproduce with <code>.venv/bin/python tests/eval.py</code>.</div>
-      <table class="eval"><tr><th></th><th>Items found</th><th>Correct exact, pre-selected</th><th>Wrong pre-selected (costly)</th><th>Correctly held back</th><th>Held back, top listing was right</th><th>Similar item acceptable</th><th>Seconds per image</th></tr>
-      ${e.rows.map(x => `<tr><td><b>${esc(x.name)}</b><div class="hint">${esc(x.what || '')}</div></td><td>${cell(x.found, e.key_items)}</td><td>${cell(x.correct_pre, e.exact_possible)}</td><td>${x.wrong_pre}</td><td>${x.held_ok}</td><td>${x.held_missed ?? ''}</td><td>${x.similar_ok == null ? 'n/a' : cell(x.similar_ok, x.similar_offered)}</td><td>${x.sec_per_image ?? ''}</td></tr>`).join('')}</table>
-      <b>What the numbers hide</b><ul>${(e.hides || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>
-      <b style="display:block;margin-top:8px">Known failure cases</b><ul>${(e.failures || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;
-  } catch (err) { box.innerHTML = '<span class="hint">No evaluation run saved yet (run <code>tests/eval.py</code>).</span>'; }
-})();
-</script>
+<script src="/static/app.js"></script>
 </body>
 </html>
